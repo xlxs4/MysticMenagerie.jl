@@ -1,0 +1,13 @@
+name = "MysticMenagerie"
+uuid = "23d0e316-78a5-4470-99a0-94f05f0d3ccf"
+authors = ["Orestis Ousoultzoglou <orousoultzoglou@gmail.com> and contributors"]
+version = "0.0.1"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

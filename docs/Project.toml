@@ -1,0 +1,3 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+MysticMenagerie = "23d0e316-78a5-4470-99a0-94f05f0d3ccf"
