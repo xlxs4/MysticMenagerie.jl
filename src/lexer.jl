@@ -24,3 +24,31 @@ function peek_char(l::Lexer)
     ch, _ = iterate(l.input, state)
     return ch
 end
+
+function next_token!(l::Lexer)
+    ch = read_char(l)
+    if ch == "="
+        token = Token(ASSIGN, "=")
+    elseif ch == ";"
+        token = Token(SEMICOLON, ";")
+    elseif ch == "("
+        token = Token(LPAREN, "(")
+    elseif ch == ")"
+        token = Token(RPAREN, ")")
+    elseif ch == ","
+        token = Token(COMMA, ",")
+    elseif ch == "+"
+        token = Token(PLUS, "+")
+    elseif ch == "{"
+        token = Token(LBRACE, "{")
+    elseif ch == "}"
+        token = Token(RBRACE, "}")
+    elseif isnothing(ch)
+        token = Token(EOF, "")
+    else
+        token = Token(ILLEGAL, string(ch))
+    end
+
+    read_char!(l)
+    return token
+end
