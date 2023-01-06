@@ -1,6 +1,7 @@
 module MysticMenagerie
 
-# Tokens
+include("types.jl")
+include("lexer.jl")
 include("token.jl")
 
 end
