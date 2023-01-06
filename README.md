@@ -8,7 +8,7 @@
 A tree-walker C-style interpreter made with the Julia programming language.
 It's inspired from [monkeylang](https://monkeylang.org) by Thorsten Ball.
 
-> _Primate Palooza, Magical Monkeys, Arcane Apes, Primate Prophets, Sorcerer Sanctorum_.
+> _Primate Palooza, Magical Monkeys, Arcane Apes, Sorcerer Sanctorum_.
 
 Main features:
 
@@ -30,3 +30,12 @@ Major parts:
 - [ ] the Abstract Syntax Tree (AST)
 - [ ] the internal object system
 - [ ] the evaluator
+
+Go to the root of the repository and run:
+
+```julia
+using JuliaFormatter, MysticMenagerie
+format(joinpath(dirname(pathof(MysticMenagerie)), ".."))
+```
+
+to format the package automatically.
