@@ -27,21 +27,21 @@ end
 
 function next_token!(l::Lexer)
     ch = read_char(l)
-    if ch == "="
+    if ch == '='
         token = Token(ASSIGN, "=")
-    elseif ch == ";"
+    elseif ch == ';'
         token = Token(SEMICOLON, ";")
-    elseif ch == "("
+    elseif ch == '('
         token = Token(LPAREN, "(")
-    elseif ch == ")"
+    elseif ch == ')'
         token = Token(RPAREN, ")")
-    elseif ch == ","
+    elseif ch == ','
         token = Token(COMMA, ",")
-    elseif ch == "+"
+    elseif ch == '+'
         token = Token(PLUS, "+")
-    elseif ch == "{"
+    elseif ch == '{'
         token = Token(LBRACE, "{")
-    elseif ch == "}"
+    elseif ch == '}'
         token = Token(RBRACE, "}")
     elseif isnothing(ch)
         token = Token(EOF, "")

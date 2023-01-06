@@ -1,6 +1,3 @@
-using MysticMenagerie
-using Test
+using MysticMenagerie, Test, SafeTestsets
 
-@testset "MysticMenagerie.jl" begin
-    # Write your tests here.
-end
+@time begin @time @safetestset "Lexer" begin include("lexer_test.jl") end end
