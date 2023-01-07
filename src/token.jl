@@ -9,6 +9,13 @@
     # Operators.
     ASSIGN
     PLUS
+    MINUS
+    BANG
+    ASTERISK
+    SLASH
+
+    LT
+    GT
 
     # Delimiters.
     COMMA

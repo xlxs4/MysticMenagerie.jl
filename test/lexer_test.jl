@@ -20,6 +20,36 @@ for token in expected
     @test m.next_token!(l) == token
 end
 
+l = m.Lexer("!-/*5;")
+expected = map(x -> m.Token(x...),
+               [
+                   (m.BANG, "!"),
+                   (m.MINUS, "-"),
+                   (m.SLASH, "/"),
+                   (m.ASTERISK, "*"),
+                   (m.INT, "5"),
+                   (m.SEMICOLON, ";"),
+               ])
+
+for token in expected
+    @test m.next_token!(l) == token
+end
+
+l = m.Lexer("5 < 10 > 5;")
+expected = map(x -> m.Token(x...),
+               [
+                   (m.INT, "5"),
+                   (m.LT, "<"),
+                   (m.INT, "10"),
+                   (m.GT, ">"),
+                   (m.INT, "5"),
+                   (m.SEMICOLON, ";"),
+               ])
+
+for token in expected
+    @test m.next_token!(l) == token
+end
+
 l = m.Lexer("""
             let five = 5;
             let ten = 10;

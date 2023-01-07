@@ -40,6 +40,18 @@ function next_token!(l::Lexer)
         token = Token(COMMA, ",")
     elseif ch == '+'
         token = Token(PLUS, "+")
+    elseif ch == '-'
+        token = Token(MINUS, "-")
+    elseif ch == '!'
+        token = Token(BANG, "!")
+    elseif ch == '/'
+        token = Token(SLASH, "/")
+    elseif ch == '*'
+        token = Token(ASTERISK, "*")
+    elseif ch == '<'
+        token = Token(LT, "<")
+    elseif ch == '>'
+        token = Token(GT, ">")
     elseif ch == '{'
         token = Token(LBRACE, "{")
     elseif ch == '}'
