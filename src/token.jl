@@ -28,3 +28,8 @@ struct Token
     type::TokenType
     literal::String
 end
+
+const KEYWORDS = Dict{String, TokenType}("fn" => FUNCTION,
+                                         "let" => LET)
+
+lookup_ident(ident::AbstractString) = ident ∈ keys(KEYWORDS) ? KEYWORDS[ident] : IDENT

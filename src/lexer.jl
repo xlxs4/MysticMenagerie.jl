@@ -26,6 +26,7 @@ function peek_char(l::Lexer)
 end
 
 function next_token!(l::Lexer)
+    skip_whitespace!(l)
     ch = read_char(l)
     if ch == '='
         token = Token(ASSIGN, "=")
@@ -45,6 +46,8 @@ function next_token!(l::Lexer)
         token = Token(RBRACE, "}")
     elseif isnothing(ch)
         token = Token(EOF, "")
+    elseif is_ident_letter(ch)
+        return read_ident!(l)
     else
         token = Token(ILLEGAL, string(ch))
     end
@@ -52,3 +55,22 @@ function next_token!(l::Lexer)
     read_char!(l)
     return token
 end
+
+function read_ident!(l::Lexer)
+    chars = Char[]
+    while is_ident_letter(read_char(l))
+        push!(chars, read_char!(l))
+    end
+
+    literal = join(chars, "")
+    return Token(lookup_ident(literal), literal)
+end
+
+function skip_whitespace!(l::Lexer)
+    is_valid_space(ch) = !isnothing(ch) && isspace(ch)
+    while is_valid_space(read_char(l))
+        read_char!(l)
+    end
+end
+
+is_ident_letter(ch) = 'a' <= ch <= 'z' || 'A' <= ch <= 'Z' || ch == '_'
