@@ -29,7 +29,12 @@ function next_token!(l::Lexer)
     skip_whitespace!(l)
     ch = read_char(l)
     if ch == '='
-        token = Token(ASSIGN, "=")
+        if peek_char(l) == '='
+            read_char!(l)
+            token = Token(EQ, "==")
+        else
+            token = Token(ASSIGN, "=")
+        end
     elseif ch == ';'
         token = Token(SEMICOLON, ";")
     elseif ch == '('
@@ -43,7 +48,12 @@ function next_token!(l::Lexer)
     elseif ch == '-'
         token = Token(MINUS, "-")
     elseif ch == '!'
-        token = Token(BANG, "!")
+        if peek_char(l) == '='
+            read_char!(l)
+            token = Token(NOT_EQ, "!=")
+        else
+            token = Token(BANG, "!")
+        end
     elseif ch == '/'
         token = Token(SLASH, "/")
     elseif ch == '*'
