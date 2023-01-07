@@ -48,22 +48,14 @@ function next_token!(l::Lexer)
         token = Token(EOF, "")
     elseif is_ident_letter(ch)
         return read_ident!(l)
+    elseif is_valid_digit(ch)
+        return read_number!(l)
     else
         token = Token(ILLEGAL, string(ch))
     end
 
     read_char!(l)
     return token
-end
-
-function read_ident!(l::Lexer)
-    chars = Char[]
-    while is_ident_letter(read_char(l))
-        push!(chars, read_char!(l))
-    end
-
-    literal = join(chars, "")
-    return Token(lookup_ident(literal), literal)
 end
 
 function skip_whitespace!(l::Lexer)
@@ -73,4 +65,24 @@ function skip_whitespace!(l::Lexer)
     end
 end
 
-is_ident_letter(ch) = 'a' <= ch <= 'z' || 'A' <= ch <= 'Z' || ch == '_'
+function read_literal!(l::Lexer, f::Function)
+    chars = Char[]
+    while f(read_char(l))
+        push!(chars, read_char!(l))
+    end
+
+    return join(chars, "")
+end
+
+function read_ident!(l::Lexer)
+    literal = read_literal!(l, is_ident_letter)
+    return Token(lookup_ident(literal), literal)
+end
+
+function read_number!(l::Lexer)
+    literal = read_literal!(l, is_valid_digit)
+    return Token(INT, literal)
+end
+
+is_ident_letter(ch) = !isnothing(ch) && ('a' <= ch <= 'z' || 'A' <= ch <= 'Z' || ch == '_')
+is_valid_digit(ch) = !isnothing(ch) && isdigit(ch)
