@@ -1,34 +1,24 @@
 @enum TokenType begin
     ILLEGAL
     EOF
-
-    # Identifiers and literals.
     IDENT
     INT
-
-    # Operators.
     ASSIGN
     PLUS
     MINUS
     BANG
     ASTERISK
     SLASH
-
     EQ
     NOT_EQ
     LT
     GT
-
-    # Delimiters.
     COMMA
     SEMICOLON
-
     LPAREN
     RPAREN
     LBRACE
     RBRACE
-
-    # Keywords.
     FUNCTION
     LET
     TRUE

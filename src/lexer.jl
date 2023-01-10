@@ -92,7 +92,6 @@ function read_literal!(l::Lexer, f::Function)
     while f(read_char(l))
         push!(chars, read_char!(l))
     end
-
     return join(chars, "")
 end
 
