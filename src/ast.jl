@@ -36,8 +36,16 @@ token_literal(ls::LetStatement) = ls.token.literal
 
 struct ReturnStatement{T} <: Statement where {T <: Expression}
     token::Token
-    value::T
+    return_value::T
 end
 
 statement_node(::ReturnStatement) = nothing
 token_literal(rs::ReturnStatement) = rs.token.literal
+
+struct ExpressionStatement{T} <: Statement where {T <: Expression}
+    token::Token
+    expression::T
+end
+
+statement_node(::ExpressionStatement) = nothing
+token_literal(es::ExpressionStatement) = es.token.literal
