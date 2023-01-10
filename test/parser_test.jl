@@ -26,6 +26,7 @@ program = m.parse_program!(p)
 end
 
 function test_let_statement(ls::m.LetStatement, name::String)
+    m.token_literal(ls) == "let" || return false
     m.token_literal(ls.name) == name || return false
     ls.name.value == name || return false
     return true
