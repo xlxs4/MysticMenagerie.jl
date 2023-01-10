@@ -37,15 +37,27 @@ function parse_let_statement!(p::Parser)
     name = Identifier(p.current_token, p.current_token.literal)
     !expect_peek!(p, ASSIGN) && return nothing
 
-    while p.current_token.type == SEMICOLON
+    while p.current_token.type != SEMICOLON
         next_token!(p)
     end
     return LetStatement(token, name, value)
 end
 
+function parse_return_statement!(p::Parser)
+    token = p.current_token
+    next_token!(p)
+
+    while p.current_token.type != SEMICOLON
+        next_token!(p)
+    end
+    return ReturnStatement(token, name, value)
+end
+
 function parse_statement!(p::Parser)
     if p.current_token.type == LET
-        return parse_let_statement(p)
+        return parse_let_statement!(p)
+    elseif p.current_token.type == RETURN
+        return parse_return_statement!(p)
     else
         return nothing
     end
