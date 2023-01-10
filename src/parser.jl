@@ -54,9 +54,9 @@ function parse_let_statement!(p::Parser)
     !expect_peek!(p, IDENT) && return nothing
     name = Identifier(p.current_token, p.current_token.literal)
     !expect_peek!(p, ASSIGN) && return nothing
-    while p.current_token.type != SEMICOLON
-        next_token!(p)
-    end
+    next_token!(p)
+    value = parse_expression(p, LOWEST)
+    p.peek_token.type == SEMICOLON && next_token!(p)
     return LetStatement(token, name, value)
 end
 
@@ -69,10 +69,10 @@ function parse_return_statement!(p::Parser)
     return ReturnStatement(token, name, value)
 end
 
-function parse_expression(p::Parser)
-    prefix = p.prefix_parse_functions[p.current_token.type]
-    isnothing(prefix) && return nothing
-    left_expression = prefix()
+function parse_expression(p::Parser, precedence::ExpressionOrder)
+    prefix_function = p.prefix_parse_functions[p.current_token.type]
+    isnothing(prefix_function) && return nothing
+    left_expression = prefix_function(p)
     return left_expression
 end
 
@@ -113,6 +113,7 @@ function parse_program!(p::Parser)
         !isnothing(stmt) && push!(program.statements, stmt)
         next_token!(p)
     end
+    return program
 end
 
 function Parser(l::Lexer)
