@@ -21,7 +21,7 @@ program = m.parse_program!(p)
 
 @test begin
     check_parser_errors(p)
-    @assert length(program.statements) == 3
+    @assert length(program.statements)==3 "program does not contain 3 statements. Got $(length(program.statements)) instead."
     true
 end
 
@@ -32,5 +32,8 @@ function test_let_statement(ls::m.LetStatement, name::String)
 end
 
 for (i, expected) in enumerate(["x", "y", "foobar"])
-    @test test_let_statement(program.statements[i], expected)
+    @test begin
+        @assert program.statements[i] isa m.LetStatement "the statement is $(typeof(program.statements[1])) instead of LetStatement."
+        test_let_statement(program.statements[i], expected)
+    end
 end

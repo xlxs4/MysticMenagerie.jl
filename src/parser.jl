@@ -73,9 +73,9 @@ function parse_return_statement!(p::Parser)
 end
 
 function parse_expression(p::Parser, precedence::ExpressionOrder)
-    prefix_function = p.prefix_parse_functions[p.current_token.type]
-    isnothing(prefix_function) && return nothing
+    p.current_token.type in keys(p.prefix_parse_functions) || return nothing
 
+    prefix_function = p.prefix_parse_functions[p.current_token.type]
     left_expression = prefix_function(p)
     return left_expression
 end
