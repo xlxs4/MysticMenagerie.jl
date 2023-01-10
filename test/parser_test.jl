@@ -4,10 +4,10 @@ const m = MysticMenagerie
 
 function check_parser_errors(p::m.Parser)
     if !isempty(p.errors)
-        msg = join(vcat(["parser has $(length(p.errors)) errors"],
-                        ["parser error: $e" for e in p.errors]), "\n")
-        error(msg)
+        return join(vcat(["parser has $(length(p.errors)) errors"],
+                         ["parser error: $e" for e in p.errors]), "\n")
     end
+    return nothing
 end
 
 function test_let_statement(ls::m.Statement, name::String)
@@ -37,7 +37,22 @@ function test_integer_literal_expression(il::m.Expression, value::Int64)
             "Expression token literal is $(m.token_literal(il)) instead of $value.")
 end
 
-@testset "Test parsing LetStatement" begin
+@testset "Test parsing invalid LetStatement" begin
+    l = m.Lexer("""
+                let 5;
+                let x 5;
+                """)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    expected = """
+    parser has 2 errors
+    parser error: expected next token to be IDENT, got INT instead
+    parser error: expected next token to be ASSIGN, got INT instead
+    """
+    @test check_parser_errors(p) == chomp(expected)
+end
+
+@testset "Test parsing valid LetStatement" begin
     l = m.Lexer("""
                 let x = 5;
                 let y = 10;
@@ -46,9 +61,10 @@ end
 
     p = m.Parser(l)
     program = m.parse_program!(p)
+    msg = check_parser_errors(p)
 
     @test begin
-        check_parser_errors(p)
+        isnothing(msg) || error(msg)
         @assert(length(program.statements)==3,
                 "Input program contains $(length(program.statements)) statements instead of 3.")
 
@@ -75,9 +91,10 @@ end
 
     p = m.Parser(l)
     program = m.parse_program!(p)
+    msg = check_parser_errors(p)
 
     @test begin
-        check_parser_errors(p)
+        isnothing(msg) || error(msg)
         @assert(length(program.statements)==3,
                 "Input program contains $(length(program.statements)) statements instead of 3.")
 
@@ -99,9 +116,10 @@ end
     l = m.Lexer("foobar;")
     p = m.Parser(l)
     program = m.parse_program!(p)
+    msg = check_parser_errors(p)
 
     @test begin
-        check_parser_errors(p)
+        isnothing(msg) || error(msg)
         @assert(length(program.statements)==1,
                 "Input program contains $(length(program.statements)) statements instead of 1.")
         @assert(isa(program.statements[1], m.ExpressionStatement),
@@ -116,9 +134,10 @@ end
     l = m.Lexer("5;")
     p = m.Parser(l)
     program = m.parse_program!(p)
+    msg = check_parser_errors(p)
 
     @test begin
-        check_parser_errors(p)
+        isnothing(msg) || error(msg)
         @assert(length(program.statements)==1,
                 "Input program contains $(length(program.statements)) statements instead of 1.")
         @assert(isa(program.statements[1], m.ExpressionStatement),
