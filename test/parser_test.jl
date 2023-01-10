@@ -19,13 +19,22 @@ function test_let_statement(ls::m.Statement, name::String)
             "Statement name token literal is $(m.token_literal(ls.name)) instead of $name.")
 end
 
-function test_identifier_expression(expr::m.Expression, value::String)
-    @assert(isa(expr, m.Identifier),
-            "Expression is $(typeof(expr)) instead of Identifier.")
-    @assert(expr.value==value,
-            "Expression value is $(expr.value) instead of $value.")
-    @assert(m.token_literal(expr)==value,
-            "Expression token literal is $(m.token_literal(expr)) instead of $value.")
+function test_identifier_expression(id::m.Expression, value::String)
+    @assert(isa(id, m.Identifier),
+            "Expression is $(typeof(id)) instead of Identifier.")
+    @assert(id.value==value,
+            "Expression value is $(id.value) instead of $value.")
+    @assert(m.token_literal(id)==value,
+            "Expression token literal is $(m.token_literal(id)) instead of $value.")
+end
+
+function test_integer_literal_expression(il::m.Expression, value::Int64)
+    @assert(isa(il, m.IntegerLiteral),
+            "Expression is $(typeof(il)) instead of IntegerLiteral.")
+    @assert(il.value==value,
+            "Expression value is $(il.value) instead of $value.")
+    @assert(m.token_literal(il)==string(value),
+            "Expression token literal is $(m.token_literal(il)) instead of $value.")
 end
 
 @testset "Test parsing LetStatement" begin
@@ -98,6 +107,23 @@ end
         @assert(isa(program.statements[1], m.ExpressionStatement),
                 "Program statement is $(typeof(program.statements[1])) instead of ExpressionStatement.")
         test_identifier_expression(program.statements[1].expression, "foobar")
+
+        true
+    end
+end
+
+@testset "Test parsing IntegerLiteral ExpressionStatement" begin
+    l = m.Lexer("5;")
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+
+    @test begin
+        check_parser_errors(p)
+        @assert(length(program.statements)==1,
+                "Input program contains $(length(program.statements)) statements instead of 1.")
+        @assert(isa(program.statements[1], m.ExpressionStatement),
+                "Program statement is $(typeof(program.statements[1])) instead of ExpressionStatement.")
+        test_integer_literal_expression(program.statements[1].expression, 5)
 
         true
     end
