@@ -33,3 +33,11 @@ end
 
 statement_node(::LetStatement) = nothing
 token_literal(ls::LetStatement) = ls.token.literal
+
+struct ReturnStatement{T} <: Statement where {T <: Expression}
+    token::Token
+    value::T
+end
+
+statement_node(::ReturnStatement) = nothing
+token_literal(rs::ReturnStatement) = rs.token.literal
