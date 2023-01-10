@@ -65,11 +65,12 @@ end
 function parse_return_statement!(p::Parser)
     token = p.current_token
     next_token!(p)
+    value = parse_expression(p, LOWEST)
     while p.current_token.type != SEMICOLON
         next_token!(p)
     end
 
-    return ReturnStatement(token, name, value)
+    return ReturnStatement(token, value)
 end
 
 function parse_expression(p::Parser, precedence::ExpressionOrder)

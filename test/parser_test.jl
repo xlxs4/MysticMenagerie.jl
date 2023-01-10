@@ -21,7 +21,7 @@ program = m.parse_program!(p)
 
 @test begin
     check_parser_errors(p)
-    @assert length(program.statements)==3 "program does not contain 3 statements. Got $(length(program.statements)) instead."
+    @assert length(program.statements)==3 "Input program does not contain 3 statements. Got $(length(program.statements)) instead."
     true
 end
 
@@ -34,7 +34,34 @@ end
 
 for (i, expected) in enumerate(["x", "y", "foobar"])
     @test begin
-        @assert program.statements[i] isa m.LetStatement "the statement is $(typeof(program.statements[1])) instead of LetStatement."
+        @assert program.statements[i] isa m.LetStatement
+        "Program statement is $(typeof(program.statements[i])) instead of LetStatement."
+
         test_let_statement(program.statements[i], expected)
+    end
+end
+
+l = m.Lexer("""
+            return 5;
+            return 10;
+            return 993322;
+            """)
+
+p = m.Parser(l)
+program = m.parse_program!(p)
+
+@test begin
+    check_parser_errors(p)
+    @assert length(program.statements)==3 "Input program does not contain 3 statements. Got $(length(program.statements)) instead."
+    true
+end
+
+for i in 1:3
+    @test begin
+        @assert program.statements[i] isa m.ReturnStatement
+        "Program statement is $(typeof(program.statements[i])) instead of ReturnStatement."
+
+        @assert m.token_literal(program.statements[i]) == "return"
+        true
     end
 end
