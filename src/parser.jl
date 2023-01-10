@@ -1,15 +1,34 @@
-mutable struct Parser
-    lexer::Lexer
-    current_token::Token
-    peek_token::Token
-    errors::Vector{String}
+@enum ExpressionOrder begin
+    LOWEST
+    EQUALS
+    LESSGREATER
+    SUM
+    PRODUCT
+    PREFIX
+    CALL
 end
 
-function Parser(l::Lexer)
-    current_token = next_token!(l)
-    peek_token = next_token!(l)
-    return Parser(l, current_token, peek_token, String[])
+const PRECEDENCE = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
+                                                    NOT_EQ => EQUALS,
+                                                    LT => LESSGREATER,
+                                                    GT => LESSGREATER,
+                                                    PLUS => SUM,
+                                                    MINUS => SUM,
+                                                    SLASH => PRODUCT,
+                                                    ASTERISK => PRODUCT,
+                                                    LPAREN => CALL)
+
+mutable struct Parser
+    lexer::Lexer
+    errors::Vector{String}
+    current_token::Token
+    peek_token::Token
+    prefix_parse_functions::Dict{TokenType, Function}
+    infix_parse_functions::Dict{TokenType, Function}
 end
+
+register_prefix!(p::Parser, t::TokenType, fn::Function) = p.prefix_parse_functions[t] = fn
+register_infix!(p::Parser, t::TokenType, fn::Function) = p.infix_parse_functions[t] = fn
 
 function peek_error!(p::Parser, t::TokenType)
     push!(p.errors, "expected next token to be $t, got $(p.peek_token.type) instead")
@@ -33,10 +52,8 @@ end
 function parse_let_statement!(p::Parser)
     token = p.current_token
     !expect_peek!(p, IDENT) && return nothing
-
     name = Identifier(p.current_token, p.current_token.literal)
     !expect_peek!(p, ASSIGN) && return nothing
-
     while p.current_token.type != SEMICOLON
         next_token!(p)
     end
@@ -46,11 +63,24 @@ end
 function parse_return_statement!(p::Parser)
     token = p.current_token
     next_token!(p)
-
     while p.current_token.type != SEMICOLON
         next_token!(p)
     end
     return ReturnStatement(token, name, value)
+end
+
+function parse_expression(p::Parser)
+    prefix = p.prefix_parse_functions[p.current_token.type]
+    isnothing(prefix) && return nothing
+    left_expression = prefix()
+    return left_expression
+end
+
+function parse_expression_statement!(p::Parser)
+    token = p.current_token
+    expression = parse_expression(p, LOWEST)
+    p.peek_token.type == SEMICOLON && next_token!(p)
+    return ExpressionStatement(token, expression)
 end
 
 function parse_statement!(p::Parser)
@@ -59,15 +89,38 @@ function parse_statement!(p::Parser)
     elseif p.current_token.type == RETURN
         return parse_return_statement!(p)
     else
+        return parse_expression_statement!(p)
+    end
+end
+
+parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
+
+function parse_integer_literal!(p::Parser)
+    try
+        value = parse(Int64, p.current_token.literal)
+        return IntegerLiteral(p.current_token, value)
+    catch
+        msg = "could not parse $(p.current_token.literal) as integer"
+        push!(p.errors, msg)
         return nothing
     end
 end
 
-function parse_program(p::Parser)
+function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
         stmt = parse_statement!(p)
         !isnothing(stmt) && push!(program.statements, stmt)
         next_token!(p)
     end
+end
+
+function Parser(l::Lexer)
+    current_token = next_token!(l)
+    peek_token = next_token!(l)
+    p = Parser(l, String[], current_token, peek_token, Dict{TokenType, Function}(),
+               Dict{TokenType, Function}())
+    register_prefix!(p, IDENT, parse_identifier)
+    register_prefix!(p, INT, parse_integer_literal!)
+    return p
 end
