@@ -94,6 +94,18 @@ function Base.string(ie::IfExpression)
     return isnothing(ie.alternative) ? left : left * "else " * ie.alternative
 end
 
+struct FunctionLiteral <: Expression
+    token::Token
+    parameters::Vector{Identifier}
+    body::BlockStatement
+end
+
+expression_node(::FunctionLiteral) = nothing
+token_literal(fl::FunctionLiteral) = fl.token.literal
+function Base.string(fl::FunctionLiteral)
+    fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " * string(fl.body)
+end
+
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
     name::Identifier
