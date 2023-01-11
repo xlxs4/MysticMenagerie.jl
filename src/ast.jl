@@ -59,7 +59,7 @@ end
 expression_node(::InfixExpression) = nothing
 token_literal(ie::InfixExpression) = ie.token.literal
 function Base.string(ie::InfixExpression)
-    "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
+    return "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
 
 struct Boolean <: Expression
@@ -70,6 +70,29 @@ end
 expression_node(::Boolean) = nothing
 token_literal(b::Boolean) = b.token.literal
 Base.string(b::Boolean) = b.token.literal
+
+struct BlockStatement <: Statement
+    token::Token
+    statements::Vector{Statement}
+end
+
+statement_node(::BlockStatement) = nothing
+token_literal(bs::BlockStatement) = bs.token.literal
+Base.string(bs::BlockStatement) = join(map(string, bs.statements))
+
+struct IfExpression{T} <: Expression where {T <: Expression}
+    token::Token
+    condition::T
+    consequence::BlockStatement
+    alternative::Optional{BlockStatement}
+end
+
+expression_node(::IfExpression) = nothing
+token_literal(ie::IfExpression) = ie.token.literal
+function Base.string(ie::IfExpression)
+    left = "if" * string(ie.condition) * " " * string(ie.consequence)
+    return isnothing(ie.alternative) ? left : left * "else " * ie.alternative
+end
 
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
