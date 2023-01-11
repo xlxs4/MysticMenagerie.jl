@@ -120,6 +120,7 @@ function parse_statement!(p::Parser)
 end
 
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
+parse_boolean(p::Parser) = Boolean(p.current_token, p.current_token.type == TRUE)
 
 function parse_integer_literal!(p::Parser)
     try
@@ -172,6 +173,8 @@ function Parser(l::Lexer)
     register_prefix!(p, INT, parse_integer_literal!)
     register_prefix!(p, BANG, parse_prefix_expression!)
     register_prefix!(p, MINUS, parse_prefix_expression!)
+    register_prefix!(p, TRUE, parse_boolean)
+    register_prefix!(p, FALSE, parse_boolean)
 
     register_infix!(p, PLUS, parse_infix_expression!)
     register_infix!(p, MINUS, parse_infix_expression!)
