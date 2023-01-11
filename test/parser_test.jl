@@ -229,6 +229,33 @@ end end
     test_infix_expression(expr, left_value, operator, right_value)
 end end
 
+@testset "Test parsing IfExpression" begin for (code) in [("if (x < y) { x }")]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.IfExpression
+
+    test_infix_expression(expr.condition, "x", "<", "y")
+
+    @test length(expr.consequence.statements) == 1
+
+    consequence = expr.consequence.statements[1]
+    @test consequence isa m.ExpressionStatement
+
+    test_identifier(consequence.expression, "x")
+
+    @test isnothing(expr.alternative)
+end end
+
 @testset "Test operator precedence" begin for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
