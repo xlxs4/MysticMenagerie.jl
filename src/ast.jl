@@ -106,6 +106,18 @@ function Base.string(fl::FunctionLiteral)
     fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " * string(fl.body)
 end
 
+struct CallExpression{T} <: Expression where {T <: Expression}
+    token::Token
+    fn::T
+    arguments::Vector{Expression}
+end
+
+expression_node(::CallExpression) = nothing
+token_literal(ce::CallExpression) = ce.token.literal
+function Base.string(ce::CallExpression)
+    string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
+end
+
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
     name::Identifier
