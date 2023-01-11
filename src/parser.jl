@@ -194,6 +194,40 @@ function parse_if_expression!(p::Parser)
     return IfExpression(token, condition, consequence, alternative)
 end
 
+function parse_function_parameters!(p::Parser)
+    identifiers = Identifier[]
+    if p.peek_token.type == RPAREN
+        next_token!(p)
+        return identifiers
+    end
+
+    next_token!(p)
+    ident = Identifier(p.current_token, p.current_token.literal)
+    push!(identifiers, ident)
+
+    while p.peek_token.type == COMMA
+        next_token!(p)
+        next_token!(p)
+        ident = Identifier(p.current_token, p.current_token.literal)
+        push!(identifiers, ident)
+    end
+
+    !expect_peek!(p, RPAREN) && return nothing
+
+    return identifiers
+end
+
+function parse_function_literal!(p::Parser)
+    token = p.current_token
+    !expect_peek!(p, LPAREN) && return nothing
+
+    parameters = parse_function_parameters!(p)
+    !expect_peek!(p, LBRACE) && return nothing
+
+    body = parse_block_statement!(p)
+    return FunctionLiteral(token, parameters, body)
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -219,6 +253,7 @@ function Parser(l::Lexer)
     register_prefix!(p, FALSE, parse_boolean)
     register_prefix!(p, LPAREN, parse_grouped_expression!)
     register_prefix!(p, IF, parse_if_expression!)
+    register_prefix!(p, FUNCTION, parse_function_literal!)
 
     register_infix!(p, PLUS, parse_infix_expression!)
     register_infix!(p, MINUS, parse_infix_expression!)
