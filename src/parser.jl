@@ -8,15 +8,14 @@
     CALL
 end
 
-const PRECEDENCE = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
-                                                    NOT_EQ => EQUALS,
-                                                    LT => LESSGREATER,
-                                                    GT => LESSGREATER,
-                                                    PLUS => SUM,
-                                                    MINUS => SUM,
-                                                    SLASH => PRODUCT,
-                                                    ASTERISK => PRODUCT,
-                                                    LPAREN => CALL)
+const PRECEDENCES = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
+                                                     NOT_EQ => EQUALS,
+                                                     LT => LESSGREATER,
+                                                     GT => LESSGREATER,
+                                                     PLUS => SUM,
+                                                     MINUS => SUM,
+                                                     SLASH => PRODUCT,
+                                                     ASTERISK => PRODUCT)
 
 mutable struct Parser
     lexer::Lexer
@@ -47,6 +46,16 @@ function expect_peek!(p::Parser, t::TokenType)
         peek_error!(p, t)
         return false
     end
+end
+
+function current_precedence(p::Parser)
+    p.current_token.type ∉ keys(PRECEDENCES) && return LOWEST
+    return PRECEDENCES[p.current_token.type]
+end
+
+function peek_precedence(p::Parser)
+    p.peek_token.type ∉ keys(PRECEDENCES) && return LOWEST
+    return PRECEDENCES[p.peek_token.type]
 end
 
 function parse_let_statement!(p::Parser)
@@ -80,6 +89,15 @@ function parse_expression!(p::Parser, precedence::ExpressionOrder)
     else
         prefix_function = p.prefix_parse_functions[p.current_token.type]
         left_expression = prefix_function(p)
+
+        while p.peek_token.type != SEMICOLON && precedence < peek_precedence(p)
+            p.peek_token.type ∉ keys(p.infix_parse_functions) && return left_expression
+
+            infix_function = p.infix_parse_functions[p.peek_token.type]
+            next_token!(p)
+            left_expression = infix_function(p, left_expression)
+        end
+
         return left_expression
     end
 end
@@ -122,6 +140,17 @@ function parse_prefix_expression!(p::Parser)
     return PrefixExpression(token, operator, right)
 end
 
+function parse_infix_expression!(p::Parser, left::Expression)
+    token = p.current_token
+    operator = p.current_token.literal
+
+    precedence = current_precedence(p)
+    next_token!(p)
+    right = parse_expression!(p, precedence)
+
+    return InfixExpression(token, left, operator, right)
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -143,5 +172,14 @@ function Parser(l::Lexer)
     register_prefix!(p, INT, parse_integer_literal!)
     register_prefix!(p, BANG, parse_prefix_expression!)
     register_prefix!(p, MINUS, parse_prefix_expression!)
+
+    register_infix!(p, PLUS, parse_infix_expression!)
+    register_infix!(p, MINUS, parse_infix_expression!)
+    register_infix!(p, SLASH, parse_infix_expression!)
+    register_infix!(p, ASTERISK, parse_infix_expression!)
+    register_infix!(p, EQ, parse_infix_expression!)
+    register_infix!(p, NOT_EQ, parse_infix_expression!)
+    register_infix!(p, LT, parse_infix_expression!)
+    register_infix!(p, GT, parse_infix_expression!)
     return p
 end
