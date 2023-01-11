@@ -131,7 +131,16 @@ end end
     test_literal_expression(il, value)
 end end
 
-@testset "Test parsing PrefixExpression" begin
+@testset "Test parsing invalid PrefixExpression" begin for (code, expected_error) in [
+    ("#;", "parser error: no prefix parse function for ILLEGAL found")
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    @test split(check_parser_errors(p), '\n')[2] == expected_error
+end end
+
+@testset "Test parsing valid PrefixExpression" begin
 
 for (code, operator, right_value) in [
     ("!5;", "!", 5),
