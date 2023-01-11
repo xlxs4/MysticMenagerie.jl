@@ -22,11 +22,19 @@ function test_integer_literal(il::m.Expression, value::Int64)
     @test m.token_literal(il) == string(value)
 end
 
+function test_boolean_literal(b::m.Boolean, value::Bool)
+    @test b isa m.Boolean
+    @test b.value == value
+    @test m.token_literal(b) == string(value)
+end
+
 function test_literal_expression(expr::m.Expression, expected)
     if expected isa Int
         test_integer_literal(expr, Int64(expected))
     elseif expected isa String
         test_identifier(expr, expected)
+    elseif expected isa Bool
+        test_boolean_literal(expr, expected)
     else
         error("Unexpected type for $expected.")
     end
@@ -114,6 +122,25 @@ end end
     test_literal_expression(ident, value)
 end end
 
+@testset "Test parsing Boolean Expression" begin for (code, value) in [
+    ("true;", true),
+    ("false;", false),
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    boolean = stmt.expression
+    test_literal_expression(boolean, value)
+end end
+
 @testset "Test parsing invalid IntegerLiteral" begin for (code, expected_error) in [("foo",
                                                                                      "parser error: could not parse foo as integer")]
     l = m.Lexer(code)
@@ -153,6 +180,8 @@ end end
 for (code, operator, right_value) in [
     ("!5;", "!", 5),
     ("-15;", "-", 15),
+    ("!true;", "!", true),
+    ("!false;", "!", false),
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
@@ -181,6 +210,9 @@ end end
     ("5 < 5;", 5, "<", 5),
     ("5 == 5;", 5, "==", 5),
     ("5 != 5;", 5, "!=", 5),
+    ("true == true", true, "==", true),
+    ("true != false", true, "!=", false),
+    ("false == false", false, "==", false),
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
@@ -210,6 +242,10 @@ end end
     ("5 > 4 == 3 < 4", "((5 > 4) == (3 < 4))"),
     ("5 < 4 != 3 > 4", "((5 < 4) != (3 > 4))"),
     ("3 + 4 * 5 == 3 * 1 + 4 * 5", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+    ("true", "true"),
+    ("false", "false"),
+    ("3 > 5 == false", "((3 > 5) == false)"),
+    ("3 < 5 == true", "((3 < 5) == true)"),
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
