@@ -32,6 +32,14 @@ function test_literal_expression(expr::m.Expression, expected)
     end
 end
 
+function test_infix_expression(expr::m.Expression, left, operator::String, right)
+    @test expr isa m.InfixExpression
+    test_literal_expression(expr.left, left)
+
+    @test expr.operator == operator
+    test_literal_expression(expr.right, right)
+end
+
 function test_let_statement(ls::m.Statement, name::String)
     @test ls isa m.LetStatement
     @test ls.name.value == name
@@ -162,4 +170,29 @@ for (code, operator, right_value) in [
     @test expr.operator == operator
 
     test_literal_expression(expr.right, right_value)
+end end
+
+@testset "Test parsing InfixExpression" begin for (code, left_value, operator, right_value) in [
+    ("5 + 5;", 5, "+", 5),
+    ("5 - 5;", 5, "-", 5),
+    ("5 * 5;", 5, "*", 5),
+    ("5 / 5;", 5, "/", 5),
+    ("5 > 5;", 5, ">", 5),
+    ("5 < 5;", 5, "<", 5),
+    ("5 == 5;", 5, "==", 5),
+    ("5 != 5;", 5, "!=", 5),
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    test_infix_expression(expr, left_value, operator, right_value)
 end end
