@@ -49,11 +49,11 @@ expression_node(::PrefixExpression) = nothing
 token_literal(pe::PrefixExpression) = pe.token.literal
 Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
 
-struct InfixExpression{T} <: Expression where {T <: Expression}
+struct InfixExpression{T, N} <: Expression where {T <: Expression, N <: Expression}
     token::Token
     left::T
     operator::String
-    right::T
+    right::N
 end
 
 expression_node(::InfixExpression) = nothing
