@@ -62,6 +62,15 @@ function Base.string(ie::InfixExpression)
     "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
 
+struct Boolean <: Expression
+    token::Token
+    value::Bool
+end
+
+expression_node(::Boolean) = nothing
+token_literal(b::Boolean) = b.token.literal
+Base.string(b::Boolean) = b.token.literal
+
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
     name::Identifier
