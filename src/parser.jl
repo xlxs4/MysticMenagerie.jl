@@ -152,6 +152,13 @@ function parse_infix_expression!(p::Parser, left::Expression)
     return InfixExpression(token, left, operator, right)
 end
 
+function parse_grouped_expression!(p::Parser)
+    next_token!(p)
+    expr = parse_expression!(p, LOWEST)
+    !expect_peek!(p, RPAREN) && return nothing
+    return expr
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -175,6 +182,7 @@ function Parser(l::Lexer)
     register_prefix!(p, MINUS, parse_prefix_expression!)
     register_prefix!(p, TRUE, parse_boolean)
     register_prefix!(p, FALSE, parse_boolean)
+    register_prefix!(p, LPAREN, parse_grouped_expression!)
 
     register_infix!(p, PLUS, parse_infix_expression!)
     register_infix!(p, MINUS, parse_infix_expression!)
