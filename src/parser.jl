@@ -15,7 +15,8 @@ const PRECEDENCES = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
                                                      PLUS => SUM,
                                                      MINUS => SUM,
                                                      SLASH => PRODUCT,
-                                                     ASTERISK => PRODUCT)
+                                                     ASTERISK => PRODUCT,
+                                                     LPAREN => CALL)
 
 mutable struct Parser
     lexer::Lexer
@@ -228,6 +229,33 @@ function parse_function_literal!(p::Parser)
     return FunctionLiteral(token, parameters, body)
 end
 
+function parse_call_arguments!(p::Parser)
+    arguments = Expression[]
+    if p.peek_token.type == RPAREN
+        next_token!(p)
+        return arguments
+    end
+
+    next_token!(p)
+    push!(arguments, parse_expression!(p, LOWEST))
+
+    while p.peek_token.type == COMMA
+        next_token!(p)
+        next_token!(p)
+        push!(arguments, parse_expression!(p, LOWEST))
+    end
+
+    !expect_peek!(p, RPAREN) && return nothing
+
+    return arguments
+end
+
+function parse_call_expression!(p::Parser, fn::Expression)
+    token = p.current_token
+    arguments = parse_call_arguments!(p)
+    return CallExpression(token, fn, arguments)
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -263,5 +291,6 @@ function Parser(l::Lexer)
     register_infix!(p, NOT_EQ, parse_infix_expression!)
     register_infix!(p, LT, parse_infix_expression!)
     register_infix!(p, GT, parse_infix_expression!)
+    register_infix!(p, LPAREN, parse_call_expression!)
     return p
 end
