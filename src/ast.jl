@@ -49,6 +49,19 @@ expression_node(::PrefixExpression) = nothing
 token_literal(pe::PrefixExpression) = pe.token.literal
 Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
 
+struct InfixExpression{T} <: Expression where {T <: Expression}
+    token::Token
+    left::T
+    operator::String
+    right::T
+end
+
+expression_node(::InfixExpression) = nothing
+token_literal(ie::InfixExpression) = ie.token.literal
+function Base.string(ie::InfixExpression)
+    "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
+end
+
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
     name::Identifier
