@@ -339,6 +339,31 @@ end end
     end
 end end
 
+@testset "Test parsing CallExpression" begin for (code) in [("add(1, 2 * 3, 4 + 5)")]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.CallExpression
+
+    test_identifier(expr.fn, "add")
+
+    @test length(expr.arguments) == 3
+
+    test_literal_expression(expr.arguments[1], 1)
+
+    test_infix_expression(expr.arguments[2], 2, "*", 3)
+    test_infix_expression(expr.arguments[3], 4, "+", 5)
+end end
+
 @testset "Test operator precedence" begin for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
