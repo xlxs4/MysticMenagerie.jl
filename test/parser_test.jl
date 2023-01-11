@@ -288,6 +288,33 @@ end end
     test_identifier(alternative.expression, "y")
 end end
 
+@testset "Test parsing FunctionLiteral" begin for (code) in [("fn(x, y) { x + y; }")]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    fn = stmt.expression
+    @test fn isa m.FunctionLiteral
+    @test length(fn.parameters) == 2
+
+    test_literal_expression(fn.parameters[1], "x")
+    test_literal_expression(fn.parameters[2], "y")
+
+    @test length(fn.body.statements) == 1
+
+    body_stmt = fn.body.statements[1]
+    @test body_stmt isa m.ExpressionStatement
+
+    test_infix_expression(body_stmt.expression, "x", "+", "y")
+end end
+
 @testset "Test operator precedence" begin for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
