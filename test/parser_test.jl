@@ -43,7 +43,7 @@ end
                 let x 5;
                 """)
     p = m.Parser(l)
-    program = m.parse_program!(p)
+    m.parse_program!(p)
     expected = """
     parser has 2 errors
     parser error: expected next token to be IDENT, got INT instead
@@ -130,7 +130,18 @@ end
     end
 end
 
-@testset "Test parsing IntegerLiteral ExpressionStatement" begin
+@testset "Test parsing invalid IntegerLiteral ExpressionStatement" begin
+    l = m.Lexer("foo")
+    p = m.Parser(l)
+    m.parse_integer_literal!(p)
+    expected = """
+    parser has 1 errors
+    parser error: could not parse foo as integer
+    """
+    @test check_parser_errors(p) == chomp(expected)
+end
+
+@testset "Test parsing valid IntegerLiteral ExpressionStatement" begin
     l = m.Lexer("5;")
     p = m.Parser(l)
     program = m.parse_program!(p)
