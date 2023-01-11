@@ -119,6 +119,19 @@ function parse_statement!(p::Parser)
     end
 end
 
+function parse_block_statement!(p::Parser)
+    token = p.current_token
+    statements = Statement[]
+    next_token!(p)
+    while p.current_token.type != RBRACE && p.current_token.type != EOF
+        stmt = parse_statement!(p)
+        !isnothing(stmt) && push!(statements, stmt)
+
+        next_token!(p)
+    end
+    return BlockStatement(token, statements)
+end
+
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
 parse_boolean(p::Parser) = Boolean(p.current_token, p.current_token.type == TRUE)
 
@@ -159,6 +172,28 @@ function parse_grouped_expression!(p::Parser)
     return expr
 end
 
+function parse_if_expression!(p::Parser)
+    token = p.current_token
+    !expect_peek!(p, LPAREN) && return nothing
+
+    next_token!(p)
+    condition = parse_expression!(p, LOWEST)
+    !expect_peek!(p, RPAREN) && return nothing
+
+    !expect_peek!(p, LBRACE) && return nothing
+
+    consequence = parse_block_statement!(p)
+    if p.peek_token.type == ELSE
+        next_token!(p)
+        !expect_peek!(p, LBRACE) && return nothing
+
+        alternative = parse_block_statement!(p)
+    else
+        alternative = nothing
+    end
+    return IfExpression(token, condition, consequence, alternative)
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -183,6 +218,7 @@ function Parser(l::Lexer)
     register_prefix!(p, TRUE, parse_boolean)
     register_prefix!(p, FALSE, parse_boolean)
     register_prefix!(p, LPAREN, parse_grouped_expression!)
+    register_prefix!(p, IF, parse_if_expression!)
 
     register_infix!(p, PLUS, parse_infix_expression!)
     register_infix!(p, MINUS, parse_infix_expression!)
