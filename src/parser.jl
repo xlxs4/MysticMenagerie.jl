@@ -30,13 +30,13 @@ end
 register_prefix!(p::Parser, t::TokenType, fn::Function) = p.prefix_parse_functions[t] = fn
 register_infix!(p::Parser, t::TokenType, fn::Function) = p.infix_parse_functions[t] = fn
 
-function peek_error!(p::Parser, t::TokenType)
-    push!(p.errors, "expected next token to be $t, got $(p.peek_token.type) instead")
-end
-
 function next_token!(p::Parser)
     p.current_token = p.peek_token
     p.peek_token = next_token!(p.lexer)
+end
+
+function peek_error!(p::Parser, t::TokenType)
+    push!(p.errors, "expected next token to be $t, got $(p.peek_token.type) instead")
 end
 
 function expect_peek!(p::Parser, t::TokenType)
@@ -57,7 +57,7 @@ function parse_let_statement!(p::Parser)
     !expect_peek!(p, ASSIGN) && return nothing
 
     next_token!(p)
-    value = parse_expression(p, LOWEST)
+    value = parse_expression!(p, LOWEST)
     p.peek_token.type == SEMICOLON && next_token!(p)
     return LetStatement(token, name, value)
 end
@@ -65,7 +65,7 @@ end
 function parse_return_statement!(p::Parser)
     token = p.current_token
     next_token!(p)
-    value = parse_expression(p, LOWEST)
+    value = parse_expression!(p, LOWEST)
     while p.current_token.type != SEMICOLON
         next_token!(p)
     end
@@ -73,17 +73,20 @@ function parse_return_statement!(p::Parser)
     return ReturnStatement(token, value)
 end
 
-function parse_expression(p::Parser, precedence::ExpressionOrder)
-    p.current_token.type in keys(p.prefix_parse_functions) || return nothing
-
-    prefix_function = p.prefix_parse_functions[p.current_token.type]
-    left_expression = prefix_function(p)
-    return left_expression
+function parse_expression!(p::Parser, precedence::ExpressionOrder)
+    if p.current_token.type ∉ keys(p.prefix_parse_functions)
+        push!(p.errors, "no prefix parse function for $(p.current_token.type) found")
+        return nothing
+    else
+        prefix_function = p.prefix_parse_functions[p.current_token.type]
+        left_expression = prefix_function(p)
+        return left_expression
+    end
 end
 
 function parse_expression_statement!(p::Parser)
     token = p.current_token
-    expression = parse_expression(p, LOWEST)
+    expression = parse_expression!(p, LOWEST)
     p.peek_token.type == SEMICOLON && next_token!(p)
     return ExpressionStatement(token, expression)
 end
@@ -111,6 +114,14 @@ function parse_integer_literal!(p::Parser)
     end
 end
 
+function parse_prefix_expression!(p::Parser)
+    token = p.current_token
+    operator = p.current_token.literal
+    next_token!(p)
+    right = parse_expression!(p, PREFIX)
+    return PrefixExpression(token, operator, right)
+end
+
 function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
@@ -130,5 +141,7 @@ function Parser(l::Lexer)
 
     register_prefix!(p, IDENT, parse_identifier)
     register_prefix!(p, INT, parse_integer_literal!)
+    register_prefix!(p, BANG, parse_prefix_expression!)
+    register_prefix!(p, MINUS, parse_prefix_expression!)
     return p
 end

@@ -9,5 +9,5 @@ const m = MysticMenagerie
                                            m.Identifier(m.Token(m.IDENT, "anotherVar"),
                                                         "anotherVar")),
                         ])
-    @test begin string(program) == "let myVar = anotherVar;" end
+    @test string(program) == "let myVar = anotherVar;"
 end

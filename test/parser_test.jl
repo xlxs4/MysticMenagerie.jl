@@ -10,151 +10,123 @@ function check_parser_errors(p::m.Parser)
     return nothing
 end
 
+function test_identifier(id::m.Expression, value::String)
+    @test id isa m.Identifier
+    @test id.value == value
+    @test m.token_literal(id) == value
+end
+
+function test_integer_literal(il::m.Expression, value::Int64)
+    @test il isa m.IntegerLiteral
+    @test il.value == value
+    @test m.token_literal(il) == string(value)
+end
+
+function test_literal_expression(expr::m.Expression, expected)
+    if expected isa Int
+        test_integer_literal(expr, Int64(expected))
+    elseif expected isa String
+        test_identifier(expr, expected)
+    else
+        error("Unexpected type for $expected.")
+    end
+end
+
 function test_let_statement(ls::m.Statement, name::String)
-    @assert(isa(ls, m.LetStatement),
-            "Statement is $(typeof(ls)) instead of LetStatement.")
-    @assert(ls.name.value==name,
-            "Statement name value is $(ls.name.value) instead of $name.")
-    @assert(m.token_literal(ls.name)==name,
-            "Statement name token literal is $(m.token_literal(ls.name)) instead of $name.")
+    @test ls isa m.LetStatement
+    @test ls.name.value == name
+    @test m.token_literal(ls.name) == name
 end
 
-function test_identifier_expression(id::m.Expression, value::String)
-    @assert(isa(id, m.Identifier),
-            "Expression is $(typeof(id)) instead of Identifier.")
-    @assert(id.value==value,
-            "Expression value is $(id.value) instead of $value.")
-    @assert(m.token_literal(id)==value,
-            "Expression token literal is $(m.token_literal(id)) instead of $value.")
-end
-
-function test_integer_literal_expression(il::m.Expression, value::Int64)
-    @assert(isa(il, m.IntegerLiteral),
-            "Expression is $(typeof(il)) instead of IntegerLiteral.")
-    @assert(il.value==value,
-            "Expression value is $(il.value) instead of $value.")
-    @assert(m.token_literal(il)==string(value),
-            "Expression token literal is $(m.token_literal(il)) instead of $value.")
-end
-
-@testset "Test parsing invalid LetStatement" begin
-    l = m.Lexer("""
-                let 5;
-                let x 5;
-                """)
+@testset "Test parsing invalid LetStatement" begin for (code, expected_error) in [
+    ("let 5;", "parser error: expected next token to be IDENT, got INT instead"),
+    ("let x 5;", "parser error: expected next token to be ASSIGN, got INT instead"),
+]
+    l = m.Lexer(code)
     p = m.Parser(l)
     m.parse_program!(p)
-    expected = """
-    parser has 2 errors
-    parser error: expected next token to be IDENT, got INT instead
-    parser error: expected next token to be ASSIGN, got INT instead
-    """
-    @test check_parser_errors(p) == chomp(expected)
-end
+    @test split(check_parser_errors(p), '\n')[2] == expected_error
+end end
 
-@testset "Test parsing valid LetStatement" begin
-    l = m.Lexer("""
-                let x = 5;
-                let y = 10;
-                let foobar = 838383;
-                """)
-
+@testset "Test parsing valid LetStatement" begin for (code, expected_ident, expected_value) in [
+    ("let x = 5;", "x", 5),
+    ("let y = 10;", "y", 10),
+    ("let foobar = 838383;", "foobar", 838383),
+]
+    l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
     msg = check_parser_errors(p)
 
-    @test begin
-        isnothing(msg) || error(msg)
-        @assert(length(program.statements)==3,
-                "Input program contains $(length(program.statements)) statements instead of 3.")
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
 
-        true
-    end
+    stmt = program.statements[1]
+    @test stmt isa m.Statement
+    test_let_statement(stmt, expected_ident)
 
-    for (i, expected) in enumerate(["x", "y", "foobar"])
-        @test begin
-            @assert(isa(program.statements[i], m.Statement),
-                    "Program statement is $(typeof(program.statements[i])) instead of Statement.")
-            test_let_statement(program.statements[i], expected)
+    value = stmt.value
+    test_literal_expression(value, expected_value)
+end end
 
-            true
-        end
-    end
-end
-
-@testset "Test parsing ReturnStatement" begin
-    l = m.Lexer("""
-                return 5;
-                return 10;
-                return 993322;
-                """)
-
+@testset "Test parsing ReturnStatement" begin for (code, expected_value) in [
+    ("return 5;", 5),
+    ("return 10;", 10),
+    ("return 993322;", 993322),
+]
+    l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
     msg = check_parser_errors(p)
 
-    @test begin
-        isnothing(msg) || error(msg)
-        @assert(length(program.statements)==3,
-                "Input program contains $(length(program.statements)) statements instead of 3.")
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
 
-        true
-    end
+    stmt = program.statements[1]
+    @test stmt isa m.ReturnStatement
 
-    for i in 1:3
-        @test begin
-            @assert(isa(program.statements[i], m.ReturnStatement),
-                    "Program statement is $(typeof(program.statements[i])) instead of ReturnStatement.")
-            @assert m.token_literal(program.statements[i]) == "return"
+    value = stmt.return_value
+    test_literal_expression(value, expected_value)
+end end
 
-            true
-        end
-    end
-end
-
-@testset "Test parsing Identifier ExpressionStatement" begin
-    l = m.Lexer("foobar;")
+@testset "Test parsing Identifier Expression" begin for (code, value) in [("foobar;",
+                                                                           "foobar")]
+    l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
     msg = check_parser_errors(p)
 
-    @test begin
-        isnothing(msg) || error(msg)
-        @assert(length(program.statements)==1,
-                "Input program contains $(length(program.statements)) statements instead of 1.")
-        @assert(isa(program.statements[1], m.ExpressionStatement),
-                "Program statement is $(typeof(program.statements[1])) instead of ExpressionStatement.")
-        test_identifier_expression(program.statements[1].expression, "foobar")
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
 
-        true
-    end
-end
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
 
-@testset "Test parsing invalid IntegerLiteral ExpressionStatement" begin
-    l = m.Lexer("foo")
+    ident = stmt.expression
+    test_literal_expression(ident, value)
+end end
+
+@testset "Test parsing invalid IntegerLiteral" begin for (code, expected_error) in [("foo",
+                                                                                     "parser error: could not parse foo as integer")]
+    l = m.Lexer(code)
     p = m.Parser(l)
     m.parse_integer_literal!(p)
-    expected = """
-    parser has 1 errors
-    parser error: could not parse foo as integer
-    """
-    @test check_parser_errors(p) == chomp(expected)
-end
+    @test split(check_parser_errors(p), '\n')[2] == expected_error
+end end
 
-@testset "Test parsing valid IntegerLiteral ExpressionStatement" begin
-    l = m.Lexer("5;")
+@testset "Test parsing valid IntegerLiteral Expression" begin for (code, value) in [("5;",
+                                                                                     5)]
+    l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
     msg = check_parser_errors(p)
 
-    @test begin
-        isnothing(msg) || error(msg)
-        @assert(length(program.statements)==1,
-                "Input program contains $(length(program.statements)) statements instead of 1.")
-        @assert(isa(program.statements[1], m.ExpressionStatement),
-                "Program statement is $(typeof(program.statements[1])) instead of ExpressionStatement.")
-        test_integer_literal_expression(program.statements[1].expression, 5)
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
 
-        true
-    end
-end
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    il = stmt.expression
+    test_literal_expression(il, value)
+end end

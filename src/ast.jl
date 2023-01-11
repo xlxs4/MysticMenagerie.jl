@@ -30,6 +30,25 @@ expression_node(::Identifier) = nothing
 token_literal(id::Identifier) = id.token.literal
 Base.string(id::Identifier) = id.value
 
+struct IntegerLiteral <: Expression
+    token::Token
+    value::Int64
+end
+
+expression_node(::IntegerLiteral) = nothing
+token_literal(il::IntegerLiteral) = il.token.literal
+Base.string(il::IntegerLiteral) = il.token.literal
+
+struct PrefixExpression{T} <: Expression where {T <: Expression}
+    token::Token
+    operator::String
+    right::T
+end
+
+expression_node(::PrefixExpression) = nothing
+token_literal(pe::PrefixExpression) = pe.token.literal
+Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
+
 struct LetStatement{T} <: Statement where {T <: Expression}
     token::Token
     name::Identifier
@@ -59,12 +78,3 @@ end
 statement_node(::ExpressionStatement) = nothing
 token_literal(es::ExpressionStatement) = es.token.literal
 Base.string(es::ExpressionStatement) = string(es.expression)
-
-struct IntegerLiteral <: Expression
-    token::Token
-    value::Int64
-end
-
-expression_node(::IntegerLiteral) = nothing
-token_literal(il::IntegerLiteral) = il.token.literal
-Base.string(il::IntegerLiteral) = il.token.literal
