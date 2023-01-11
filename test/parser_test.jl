@@ -130,3 +130,27 @@ end end
     il = stmt.expression
     test_literal_expression(il, value)
 end end
+
+@testset "Test parsing PrefixExpression" begin
+
+for (code, operator, right_value) in [
+    ("!5;", "!", 5),
+    ("-15;", "-", 15),
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.PrefixExpression
+    @test expr.operator == operator
+
+    test_literal_expression(expr.right, right_value)
+end end
