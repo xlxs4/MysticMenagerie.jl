@@ -315,6 +315,30 @@ end end
     test_infix_expression(body_stmt.expression, "x", "+", "y")
 end end
 
+@testset "Test parsing FunctionLiteral parameters" begin for (code, expected) in [
+    ("fn() {};", []),
+    ("fn(x) {};", ["x"]),
+    ("fn(x, y, z) {};", ["x", "y", "z"]),
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    fn = stmt.expression
+    @test length(fn.parameters) == length(expected)
+
+    for (parameter, expected_parameter) in zip(fn.parameters, expected)
+        test_literal_expression(parameter, expected_parameter)
+    end
+end end
+
 @testset "Test operator precedence" begin for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
