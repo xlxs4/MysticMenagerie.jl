@@ -37,7 +37,7 @@ end
 
 expression_node(::IntegerLiteral) = nothing
 token_literal(il::IntegerLiteral) = il.token.literal
-Base.string(il::IntegerLiteral) = il.token.literal
+Base.string(il::IntegerLiteral) = token_literal(il)
 
 struct PrefixExpression{T} <: Expression where {T <: Expression}
     token::Token
@@ -69,7 +69,7 @@ end
 
 expression_node(::Boolean) = nothing
 token_literal(b::Boolean) = b.token.literal
-Base.string(b::Boolean) = b.token.literal
+Base.string(b::Boolean) = token_literal(b)
 
 struct BlockStatement <: Statement
     token::Token
@@ -90,8 +90,9 @@ end
 expression_node(::IfExpression) = nothing
 token_literal(ie::IfExpression) = ie.token.literal
 function Base.string(ie::IfExpression)
-    left = "if" * string(ie.condition) * " " * string(ie.consequence)
-    return isnothing(ie.alternative) ? left : left * "else " * ie.alternative
+    left = "if (" * string(ie.condition) * ") { " * string(ie.consequence) * " } "
+    return isnothing(ie.alternative) ? left :
+           (left * "else { " * string(ie.alternative) * " }")
 end
 
 struct FunctionLiteral <: Expression
@@ -137,7 +138,7 @@ end
 
 statement_node(::ReturnStatement) = nothing
 token_literal(rs::ReturnStatement) = rs.token.literal
-Base.string(rs::ReturnStatement) = rs.token.literal * " " * string(rs.return_value) * ";"
+Base.string(rs::ReturnStatement) = token_literal(rs) * " " * string(rs.return_value) * ";"
 
 struct ExpressionStatement{T} <: Statement where {T <: Expression}
     token::Token
