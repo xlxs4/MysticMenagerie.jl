@@ -2,9 +2,7 @@
     ("let 5;", "parser error: expected next token to be IDENT, got INT instead"),
     ("let x 5;", "parser error: expected next token to be ASSIGN, got INT instead"),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    m.parse_program!(p)
+    _, p, _ = parse_from_code!(code)
     @test split(check_parser_errors(p), '\n')[2] == expected_error
 end end
 
@@ -13,12 +11,9 @@ end end
     ("let y = true;", "y", true),
     ("let foobar = y;", "foobar", "y"),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -34,12 +29,9 @@ end end
     ("return false;", false),
     ("return y;", "y"),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]

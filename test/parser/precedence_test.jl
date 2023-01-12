@@ -25,11 +25,8 @@
      "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
     ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test string(program) == expected
 end end

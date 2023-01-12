@@ -10,12 +10,9 @@ end end
 @testset "Test parsing valid IntegerLiteral" begin for (code, value) in [
     ("5;", 5)
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -26,12 +23,9 @@ end end
 end end
 
 @testset "Test parsing FunctionLiteral" begin for (code) in [("fn(x, y) { x + y; }")]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -57,12 +51,9 @@ end end
     ("fn(x) {};", ["x"]),
     ("fn(x, y, z) {};", ["x", "y", "z"]),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]

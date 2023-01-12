@@ -1,12 +1,9 @@
 @testset "Test parsing Identifier Expression" begin for (code, value) in [
     ("foobar;", "foobar")
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -20,12 +17,9 @@ end end
     ("true;", true),
     ("false;", false),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -38,9 +32,7 @@ end end
 @testset "Test parsing invalid PrefixExpression" begin for (code, expected_error) in [
     ("#;", "parser error: no prefix parse function for ILLEGAL found")
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
+    _, p, _ = parse_from_code!(code)
     @test split(check_parser_errors(p), '\n')[2] == expected_error
 end end
 
@@ -52,12 +44,9 @@ for (code, operator, right_value) in [
     ("!true;", "!", true),
     ("!false;", "!", false),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -83,12 +72,9 @@ end end
     ("true != false", true, "!=", false),
     ("false == false", false, "==", false),
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -99,12 +85,9 @@ end end
 end end
 
 @testset "Test parsing if-only IfExpression" begin for (code) in [("if (x < y) { x }")]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -126,12 +109,9 @@ end end
 end end
 
 @testset "Test parsing if-else IfExpression" begin for (code) in [("if (x < y) { x } else { y }")]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -160,12 +140,9 @@ end end
 @testset "Test parsing empty CallExpression" begin for (code, expected_ident) in [
     ("foo()", "foo")
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]
@@ -185,12 +162,9 @@ end end
      ("*", "+"),
      (3, 5))
 ]
-    l = m.Lexer(code)
-    p = m.Parser(l)
-    program = m.parse_program!(p)
-    msg = check_parser_errors(p)
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
 
-    @test isnothing(msg) || error(msg)
     @test length(program.statements) == 1
 
     stmt = program.statements[1]

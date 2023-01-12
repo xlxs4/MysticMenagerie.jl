@@ -1,13 +1,5 @@
 const m = MysticMenagerie
 
-function check_parser_errors(p::m.Parser)
-    if !isempty(p.errors)
-        return join(vcat(["parser has $(length(p.errors)) errors"],
-                         ["parser error: $e" for e in p.errors]), "\n")
-    end
-    return nothing
-end
-
 function test_identifier(id::m.Expression, value::String)
     @test id isa m.Identifier
     @test id.value == value
@@ -50,4 +42,24 @@ function test_let_statement(ls::m.Statement, name::String)
     @test ls isa m.LetStatement
     @test ls.name.value == name
     @test m.token_literal(ls.name) == name
+end
+
+function parse_from_code!(code::String)
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    return l, p, program
+end
+
+function check_parser_errors(p::m.Parser)
+    if !isempty(p.errors)
+        return join(vcat(["parser has $(length(p.errors)) errors"],
+                         ["parser error: $e" for e in p.errors]), "\n")
+    end
+    return nothing
+end
+
+function test_parser_errors(p::m.Parser)
+    msg = check_parser_errors(p)
+    @test isnothing(msg) || error(msg)
 end
