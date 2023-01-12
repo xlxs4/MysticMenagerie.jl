@@ -25,11 +25,16 @@ function start_repl()
         print(PROMPT)
         line = readline()
         isempty(line) && break
+
         l = Lexer(line)
-        token = next_token!(l)
-        while token.type != EOF
-            println(token)
-            token = next_token!(l)
+        p = Parser(l)
+        program = parse_program!(p)
+
+        if !isempty(p.errors)
+            println(join(p.errors, "\n"))
+            continue
         end
+
+        println(program)
     end
 end
