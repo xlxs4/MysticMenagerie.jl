@@ -6,7 +6,7 @@ Base.show(io::IO, node::Node) = print(io, string(node))
 
 token_literal(::Node) = error("token_literal is not defined in the concrete type")
 token_literal(::Expression) = error("token_literal is not defined in the concrete type")
-token_literal(::Statement) = error("token literal is not defined in the concrete type")
+token_literal(::Statement) = error("token_literal is not defined in the concrete type")
 
 function expression_node(::Expression)
     error("expression_node is not defined in the concrete type")
