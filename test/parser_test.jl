@@ -66,8 +66,8 @@ end end
 
 @testset "Test parsing valid LetStatement" begin for (code, expected_ident, expected_value) in [
     ("let x = 5;", "x", 5),
-    ("let y = 10;", "y", 10),
-    ("let foobar = 838383;", "foobar", 838383),
+    ("let y = true;", "y", true),
+    ("let foobar = y;", "foobar", "y"),
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
@@ -81,8 +81,8 @@ end end
     @test stmt isa m.Statement
     test_let_statement(stmt, expected_ident)
 
-    value = stmt.value
-    test_literal_expression(value, expected_value)
+    val = stmt.value
+    test_literal_expression(val, expected_value)
 end end
 
 @testset "Test parsing ReturnStatement" begin for (code, expected_value) in [
