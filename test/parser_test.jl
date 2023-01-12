@@ -87,8 +87,8 @@ end end
 
 @testset "Test parsing ReturnStatement" begin for (code, expected_value) in [
     ("return 5;", 5),
-    ("return 10;", 10),
-    ("return 993322;", 993322),
+    ("return false;", false),
+    ("return y;", "y"),
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
@@ -101,8 +101,8 @@ end end
     stmt = program.statements[1]
     @test stmt isa m.ReturnStatement
 
-    value = stmt.return_value
-    test_literal_expression(value, expected_value)
+    val = stmt.return_value
+    test_literal_expression(val, expected_value)
 end end
 
 @testset "Test parsing Identifier Expression" begin for (code, value) in [("foobar;",
