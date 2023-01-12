@@ -1,5 +1,9 @@
-using MysticMenagerie, Test, SafeTestsets
+using MysticMenagerie, Test
 
-@time begin @time @safetestset "Lexer" begin include("lexer_test.jl") end end
-@time begin @time @safetestset "Parser" begin include("parser_test.jl") end end
-@time begin @time @safetestset "AST" begin include("ast_test.jl") end end
+const m = MysticMenagerie
+
+include("test_helpers.jl")
+
+@time begin @time @testset "Lexer" begin include("lexer/lexer_test.jl") end end
+@time begin @time @testset "Parser" begin include("parser/parser_test.jl") end end
+@time begin @time @testset "AST" begin include("ast/ast_test.jl") end end
