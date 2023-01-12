@@ -105,8 +105,9 @@ end end
     test_literal_expression(val, expected_value)
 end end
 
-@testset "Test parsing Identifier Expression" begin for (code, value) in [("foobar;",
-                                                                           "foobar")]
+@testset "Test parsing Identifier Expression" begin for (code, value) in [
+    ("foobar;", "foobar")
+]
     l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
@@ -141,16 +142,18 @@ end end
     test_literal_expression(boolean, value)
 end end
 
-@testset "Test parsing invalid IntegerLiteral" begin for (code, expected_error) in [("foo",
-                                                                                     "parser error: could not parse foo as integer")]
+@testset "Test parsing invalid IntegerLiteral" begin for (code, expected_error) in [
+    ("foo", "parser error: could not parse foo as integer")
+]
     l = m.Lexer(code)
     p = m.Parser(l)
     m.parse_integer_literal!(p)
     @test split(check_parser_errors(p), '\n')[2] == expected_error
 end end
 
-@testset "Test parsing valid IntegerLiteral Expression" begin for (code, value) in [("5;",
-                                                                                     5)]
+@testset "Test parsing valid IntegerLiteral Expression" begin for (code, value) in [
+    ("5;", 5)
+]
     l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
@@ -201,7 +204,7 @@ for (code, operator, right_value) in [
     test_literal_expression(expr.right, right_value)
 end end
 
-@testset "Test parsing InfixExpression" begin for (code, left_value, operator, right_value) in [
+@testset "Test parsing InfixExpression" begin for (code, left, operator, right) in [
     ("5 + 5;", 5, "+", 5),
     ("5 - 5;", 5, "-", 5),
     ("5 * 5;", 5, "*", 5),
@@ -226,7 +229,7 @@ end end
     @test stmt isa m.ExpressionStatement
 
     expr = stmt.expression
-    test_infix_expression(expr, left_value, operator, right_value)
+    test_infix_expression(expr, left, operator, right)
 end end
 
 @testset "Test parsing if-only IfExpression" begin for (code) in [("if (x < y) { x }")]
@@ -339,7 +342,9 @@ end end
     end
 end end
 
-@testset "Test parsing CallExpression" begin for (code) in [("add(1, 2 * 3, 4 + 5)")]
+@testset "Test parsing empty CallExpression" begin for (code, expected_ident) in [
+    ("foo()", "foo")
+]
     l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
@@ -354,14 +359,39 @@ end end
     expr = stmt.expression
     @test expr isa m.CallExpression
 
-    test_identifier(expr.fn, "add")
+    test_identifier(expr.fn, expected_ident)
+    @test isempty(expr.arguments)
+end end
+
+@testset "Test parsing CallExpression with arguments" begin for (code, expected_ident, left, operator, right) in [
+    ("add(1, 2 * 3, 4 + 5)",
+     "add",
+     (2, 4),
+     ("*", "+"),
+     (3, 5))
+]
+    l = m.Lexer(code)
+    p = m.Parser(l)
+    program = m.parse_program!(p)
+    msg = check_parser_errors(p)
+
+    @test isnothing(msg) || error(msg)
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.CallExpression
+
+    test_identifier(expr.fn, expected_ident)
 
     @test length(expr.arguments) == 3
 
     test_literal_expression(expr.arguments[1], 1)
 
-    test_infix_expression(expr.arguments[2], 2, "*", 3)
-    test_infix_expression(expr.arguments[3], 4, "+", 5)
+    test_infix_expression(expr.arguments[2], left[1], operator[1], right[1])
+    test_infix_expression(expr.arguments[3], left[2], operator[2], right[2])
 end end
 
 @testset "Test operator precedence" begin for (code, expected) in [
