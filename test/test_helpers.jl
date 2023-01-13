@@ -29,16 +29,18 @@ function test_boolean_literal(b::m.BooleanLiteral, value::Bool)
     @test m.token_literal(b) == string(value)
 end
 
-function test_literal_expression(expr::m.Expression, expected)
-    if expected isa Int
-        test_integer_literal(expr, Int64(expected))
-    elseif expected isa String
-        test_identifier(expr, expected)
-    elseif expected isa Bool
-        test_boolean_literal(expr, expected)
-    else
-        error("Unexpected type for $expected.")
-    end
+test_literal_expression(::m.Expression, expected) = error("Unexpected type for $expected.")
+
+function test_literal_expression(expr::m.Expression, expected::Int)
+    test_integer_literal(expr, Int64(expected))
+end
+
+function test_literal_expression(expr::m.Expression, expected::String)
+    test_identifier(expr, expected)
+end
+
+function test_literal_expression(expr::m.Expression, expected::Bool)
+    test_boolean_literal(expr, expected)
 end
 
 function test_infix_expression(expr::m.Expression, left, operator::String, right)
