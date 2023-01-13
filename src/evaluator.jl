@@ -23,7 +23,13 @@ function evaluate_statements(statements::Vector{Statement})
 end
 
 function evaluate_prefix_expression(operator::String, right::Object)
-    return operator == "!" ? evaluate_bang_operator_expression(right) : _NULL
+    if operator == "!"
+        return evaluate_bang_operator_expression(right)
+    elseif operator == "-"
+        return evaluate_minus_operator_expression(right)
+    else
+        return _NULL
+    end
 end
 
 function evaluate_bang_operator_expression(right::Object)
@@ -33,3 +39,6 @@ function evaluate_bang_operator_expression(right::Object)
         return _FALSE
     end
 end
+
+evaluate_minus_operator_expression(::Object) = _NULL
+evaluate_minus_operator_expression(right::IntegerObj) = IntegerObj(-right.value)

@@ -1,4 +1,4 @@
-@testset "Test BANG operator" begin for (code, expected) in [
+@testset "Test BANG operator PrefixExpression" begin for (code, expected) in [
     ("!true", false),
     ("!false", true),
     ("!5", false),
