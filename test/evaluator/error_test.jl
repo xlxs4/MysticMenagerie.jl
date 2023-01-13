@@ -1,4 +1,4 @@
-@testset "Test ErrorObj invalid Expression with BOOLEAN" begin for (code, expected) in [
+@testset "Test ErrorObj invalid Expression" begin for (code, expected) in [
     ("5 + true;", "type mismatch: INTEGER + BOOLEAN"),
     ("5 + true; 5;", "type mismatch: INTEGER + BOOLEAN"),
     ("-true", "unknown operator: -BOOLEAN"),
@@ -14,6 +14,15 @@
         return 1;
     }
     """, "unknown operator: BOOLEAN + BOOLEAN"),
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    test_object(evaluated, expected)
+end end
+
+@testset "Test ErrorObj unbound identifier" begin for (code, expected) in [
+    ("foobar", "identifier not found: foobar"),
 ]
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.Object

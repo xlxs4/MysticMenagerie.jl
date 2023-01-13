@@ -79,5 +79,6 @@ test_object(object::m.Object, expected::String) = @test object.message == expect
 
 function evaluate_from_code!(code::String)
     _, _, program = parse_from_code!(code)
-    return m.evaluate(program)
+    env = m.Environment()
+    return m.evaluate(program, env)
 end

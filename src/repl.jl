@@ -21,6 +21,7 @@ const PROMPT = ">> "
 
 function start_repl()
     println(PRELUDE)
+    env = Environment()
     while true
         print(PROMPT)
         line = readline()
@@ -31,11 +32,12 @@ function start_repl()
         program = parse_program!(p)
 
         if !isempty(p.errors)
-            println(join(p.errors, "\n"))
+            println(ErrorObj("parser has $(length(p.errors)) error$(length(p.errors) == 1 ? "" : "s")"))
+            println(join(map(string, p.errors), "\n"))
             continue
         end
 
-        evaluated = evaluate(program)
+        evaluated = evaluate(program, env)
         !isnothing(evaluated) && println(evaluated)
     end
 end

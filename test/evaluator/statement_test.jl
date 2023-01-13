@@ -18,3 +18,15 @@
 
     test_object(evaluated, expected)
 end end
+
+@testset "Test LetStatement" begin for (code, expected) in [
+    ("let a = 5; a;", 5),
+    ("let a = 5 * 5; a;", 25),
+    ("let a = 5; let b = a; b;", 5),
+    ("let a = 5; let b = a; let c = a + b + 5; c;", 15),
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    test_object(evaluated, expected)
+end end

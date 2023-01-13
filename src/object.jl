@@ -42,3 +42,11 @@ end
 
 type(::ErrorObj) = ERROR_OBJ
 Base.string(e::ErrorObj) = "ERROR: " * e.message
+
+struct Environment{T <: Object}
+    store::Dict{String, T}
+end
+
+Environment() = Environment(Dict{String, Object}())
+get(env::Environment, name::String) = Base.get(env.store, name, nothing)
+set!(env::Environment, name::String, value::Object) = push!(env.store, name => value)
