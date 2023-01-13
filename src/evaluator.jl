@@ -9,6 +9,11 @@ function evaluate(node::Node)
         right = evaluate(node.right)
         return evaluate_prefix_expression(node.operator, right)
     end
+    if node isa InfixExpression
+        left = evaluate(node.left)
+        right = evaluate(node.right)
+        return evaluate_infix_expression(node.operator, left, right)
+    end
     node isa IntegerLiteral && return IntegerObj(node.value)
     node isa BooleanLiteral && return node.value ? _TRUE : _FALSE
     return nothing
@@ -42,3 +47,27 @@ end
 
 evaluate_minus_operator_expression(::Object) = _NULL
 evaluate_minus_operator_expression(right::IntegerObj) = IntegerObj(-right.value)
+
+function evaluate_infix_expression(operator::String, left::Object, right::Object)
+    if type(left) == INTEGER_OBJ && type(right) == INTEGER_OBJ
+        return evaluate_integer_infix_expression(operator, left, right)
+    else
+        return _NULL
+    end
+end
+
+function evaluate_integer_infix_expression(operator::String, left::IntegerObj,
+                                           right::IntegerObj)
+    if operator == "+"
+        return IntegerObj(left.value + right.value)
+    elseif operator == "-"
+        return IntegerObj(left.value - right.value)
+    elseif operator == "*"
+        return IntegerObj(left.value * right.value)
+    elseif operator == "/"
+        right.value == 0 && return _NULL
+        return IntegerObj(left.value ÷ right.value)
+    else
+        return _NULL
+    end
+end
