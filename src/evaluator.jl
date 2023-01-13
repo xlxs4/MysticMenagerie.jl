@@ -2,8 +2,12 @@ const _TRUE = BooleanObj(true)
 const _FALSE = BooleanObj(false)
 const _NULL = NullObj()
 
+is_truthy(::Object) = true
+is_truthy(b::BooleanObj) = b.value
+is_truthy(::NullObj) = false
+
 evaluate(::Node) = nothing
-evaluate(node::Program) = evaluate_statements(node.statements)
+evaluate(node::Program) = evaluate(node.statements)
 evaluate(node::ExpressionStatement) = evaluate(node.expression)
 
 function evaluate(node::PrefixExpression)
@@ -20,16 +24,27 @@ end
 evaluate(node::IntegerLiteral) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral) = node.value ? _TRUE : _FALSE
 
-evaluate(node::BlockStatement) = evaluate_statements(node.statements)
-evaluate(node::IfExpression) = evaluate_if_expression(node)
+evaluate(node::BlockStatement) = evaluate(node.statements)
+function evaluate(node::IfExpression)
+    if is_truthy(evaluate(node.condition))
+        return evaluate(node.consequence)
+    elseif !isnothing(node.alternative)
+        return evaluate(node.alternative)
+    else
+        return _NULL
+    end
+end
 
-function evaluate_statements(statements::Vector{Statement})
+function evaluate(statements::Vector{Statement})
     result = _NULL
     for stmt in statements
         result = evaluate(stmt)
+        result isa ReturnValue && return result.value
     end
     return result
 end
+
+evaluate(node::ReturnStatement) = ReturnValue(evaluate(node.return_value))
 
 function evaluate_prefix_expression(operator::String, right::Object)
     if operator == "!"
@@ -85,17 +100,3 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
         return _NULL
     end
 end
-
-function evaluate_if_expression(ie::IfExpression)
-    if is_truthy(evaluate(ie.condition))
-        return evaluate(ie.consequence)
-    elseif !isnothing(ie.alternative)
-        return evaluate(ie.alternative)
-    else
-        return _NULL
-    end
-end
-
-is_truthy(::Object) = true
-is_truthy(b::BooleanObj) = b.value
-is_truthy(::NullObj) = false

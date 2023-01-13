@@ -7,6 +7,7 @@ type(::Object) = error("type is not defined in the concrete type")
 const INTEGER_OBJ = "INTEGER"
 const BOOLEAN_OBJ = "BOOLEAN"
 const NULL_OBJ = "NULL"
+const RETURN_VALUE = "RETURN_VALUE"
 
 struct IntegerObj <: Object
     value::Int64
@@ -26,3 +27,10 @@ struct NullObj <: Object end
 
 type(::NullObj) = NULL_OBJ
 Base.string(n::NullObj) = "null"
+
+struct ReturnValue{T} <: Object where {T <: Object}
+    value::T
+end
+
+type(::ReturnValue) = RETURN_VALUE
+Base.string(rv::ReturnValue) = string(rv.value)
