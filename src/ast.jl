@@ -13,7 +13,7 @@ function expression_node(::Expression)
 end
 statement_node(::Statement) = error("statement_node is not defined in the concrete type")
 
-struct Program
+struct Program <: Node
     statements::Vector{Statement}
 end
 
@@ -62,14 +62,14 @@ function Base.string(ie::InfixExpression)
     return "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
 
-struct Boolean <: Expression
+struct BooleanLiteral <: Expression
     token::Token
     value::Bool
 end
 
-expression_node(::Boolean) = nothing
-token_literal(b::Boolean) = b.token.literal
-Base.string(b::Boolean) = token_literal(b)
+expression_node(::BooleanLiteral) = nothing
+token_literal(b::BooleanLiteral) = b.token.literal
+Base.string(b::BooleanLiteral) = token_literal(b)
 
 struct BlockStatement <: Statement
     token::Token
