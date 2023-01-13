@@ -24,6 +24,14 @@ end end
 @testset "Test evaluating BooleanLiteral" begin for (code, expected) in [
     ("true", true),
     ("false", false),
+    ("1 < 2", true),
+    ("1 > 2", false),
+    ("1 < 1", false),
+    ("1 > 1", false),
+    ("1 == 1", true),
+    ("1 != 1", false),
+    ("1 == 2", false),
+    ("1 != 2", true),
 ]
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.Object

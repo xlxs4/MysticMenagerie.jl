@@ -67,6 +67,14 @@ function evaluate_integer_infix_expression(operator::String, left::IntegerObj,
     elseif operator == "/"
         right.value == 0 && return _NULL
         return IntegerObj(left.value ÷ right.value)
+    elseif operator == "<"
+        return left.value < right.value ? _TRUE : _FALSE
+    elseif operator == ">"
+        return left.value > right.value ? _TRUE : _FALSE
+    elseif operator == "=="
+        return left.value == right.value ? _TRUE : _FALSE
+    elseif operator == "!="
+        return left.value != right.value ? _TRUE : _FALSE
     else
         return _NULL
     end
