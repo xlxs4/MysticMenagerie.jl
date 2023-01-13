@@ -1,5 +1,3 @@
-const m = MysticMenagerie
-
 function check_parser_errors(p::m.Parser)
     if !isempty(p.errors)
         return join(vcat(["parser has $(length(p.errors)) errors"],

@@ -1,2 +1,2 @@
-@time begin @time @testset "IntegerLiteral" begin include("integer_test.jl") end end
-@time begin @time @testset "BooleanLiteral" begin include("boolean_test.jl") end end
+@time begin @time @testset "Literal" begin include("literal_test.jl") end end
+@time begin @time @testset "Expression" begin include("expression_test.jl") end end
