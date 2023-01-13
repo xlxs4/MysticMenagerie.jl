@@ -39,7 +39,7 @@ expression_node(::IntegerLiteral) = nothing
 token_literal(il::IntegerLiteral) = il.token.literal
 Base.string(il::IntegerLiteral) = token_literal(il)
 
-struct PrefixExpression{T} <: Expression where {T <: Expression}
+struct PrefixExpression{T <: Expression} <: Expression
     token::Token
     operator::String
     right::T
@@ -49,7 +49,7 @@ expression_node(::PrefixExpression) = nothing
 token_literal(pe::PrefixExpression) = pe.token.literal
 Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
 
-struct InfixExpression{T, N} <: Expression where {T <: Expression, N <: Expression}
+struct InfixExpression{T <: Expression, N <: Expression} <: Expression
     token::Token
     left::T
     operator::String
@@ -80,7 +80,7 @@ statement_node(::BlockStatement) = nothing
 token_literal(bs::BlockStatement) = bs.token.literal
 Base.string(bs::BlockStatement) = join(map(string, bs.statements))
 
-struct IfExpression{T} <: Expression where {T <: Expression}
+struct IfExpression{T <: Expression} <: Expression
     token::Token
     condition::T
     consequence::BlockStatement
@@ -107,7 +107,7 @@ function Base.string(fl::FunctionLiteral)
     fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " * string(fl.body)
 end
 
-struct CallExpression{T} <: Expression where {T <: Expression}
+struct CallExpression{T <: Expression} <: Expression
     token::Token
     fn::T
     arguments::Vector{Expression}
@@ -119,7 +119,7 @@ function Base.string(ce::CallExpression)
     string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
 end
 
-struct LetStatement{T} <: Statement where {T <: Expression}
+struct LetStatement{T <: Expression} <: Statement
     token::Token
     name::Identifier
     value::T
@@ -131,7 +131,7 @@ function Base.string(ls::LetStatement)
     ls.token.literal * " " * string(ls.name) * " = " * string(ls.value) * ";"
 end
 
-struct ReturnStatement{T} <: Statement where {T <: Expression}
+struct ReturnStatement{T <: Expression} <: Statement
     token::Token
     return_value::T
 end
@@ -140,7 +140,7 @@ statement_node(::ReturnStatement) = nothing
 token_literal(rs::ReturnStatement) = rs.token.literal
 Base.string(rs::ReturnStatement) = token_literal(rs) * " " * string(rs.return_value) * ";"
 
-struct ExpressionStatement{T} <: Statement where {T <: Expression}
+struct ExpressionStatement{T <: Expression} <: Statement
     token::Token
     expression::T
 end

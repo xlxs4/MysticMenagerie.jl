@@ -106,6 +106,8 @@ end
 function parse_expression_statement!(p::Parser)
     token = p.current_token
     expression = parse_expression!(p, LOWEST)
+    isnothing(expression) && return nothing
+
     p.peek_token.type == SEMICOLON && next_token!(p)
     return ExpressionStatement(token, expression)
 end

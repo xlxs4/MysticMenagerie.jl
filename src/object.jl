@@ -29,7 +29,7 @@ struct NullObj <: Object end
 type(::NullObj) = NULL_OBJ
 Base.string(n::NullObj) = "null"
 
-struct ReturnValue{T} <: Object where {T <: Object}
+struct ReturnValue{T <: Object} <: Object
     value::T
 end
 
