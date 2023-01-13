@@ -24,7 +24,6 @@ end
 evaluate(node::IntegerLiteral) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral) = node.value ? _TRUE : _FALSE
 
-evaluate(node::BlockStatement) = evaluate(node.statements)
 function evaluate(node::IfExpression)
     if is_truthy(evaluate(node.condition))
         return evaluate(node.consequence)
@@ -40,6 +39,17 @@ function evaluate(statements::Vector{Statement})
     for stmt in statements
         result = evaluate(stmt)
         result isa ReturnValue && return result.value
+    end
+    return result
+end
+
+function evaluate(node::BlockStatement)
+    result = _NULL
+    for stmt in node.statements
+        result = evaluate(stmt)
+        if !isnothing(result) && type(result) == RETURN_VALUE
+            return result
+        end
     end
     return result
 end
