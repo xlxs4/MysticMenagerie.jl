@@ -13,7 +13,7 @@
     test_literal_expression(ident, value)
 end end
 
-@testset "Test parsing Boolean Expression" begin for (code, value) in [
+@testset "Test parsing BooleanLiteral Expression" begin for (code, value) in [
     ("true;", true),
     ("false;", false),
 ]
