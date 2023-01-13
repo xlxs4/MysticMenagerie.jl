@@ -8,6 +8,7 @@ const INTEGER_OBJ = "INTEGER"
 const BOOLEAN_OBJ = "BOOLEAN"
 const NULL_OBJ = "NULL"
 const RETURN_VALUE = "RETURN_VALUE"
+const ERROR_OBJ = "ERROR"
 
 struct IntegerObj <: Object
     value::Int64
@@ -34,3 +35,10 @@ end
 
 type(::ReturnValue) = RETURN_VALUE
 Base.string(rv::ReturnValue) = string(rv.value)
+
+struct ErrorObj <: Object
+    message::String
+end
+
+type(::ErrorObj) = ERROR_OBJ
+Base.string(e::ErrorObj) = "ERROR: " * e.message

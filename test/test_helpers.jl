@@ -75,6 +75,8 @@ function test_object(object::m.Object, expected::Bool)
     @test object.value == expected
 end
 
+test_object(object::m.Object, expected::String) = @test object.message == expected
+
 function evaluate_from_code!(code::String)
     _, _, program = parse_from_code!(code)
     return m.evaluate(program)
