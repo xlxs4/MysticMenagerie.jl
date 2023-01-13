@@ -20,8 +20,11 @@ end
 evaluate(node::IntegerLiteral) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral) = node.value ? _TRUE : _FALSE
 
+evaluate(node::BlockStatement) = evaluate_statements(node.statements)
+evaluate(node::IfExpression) = evaluate_if_expression(node)
+
 function evaluate_statements(statements::Vector{Statement})
-    result = nothing
+    result = _NULL
     for stmt in statements
         result = evaluate(stmt)
     end
@@ -82,3 +85,17 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
         return _NULL
     end
 end
+
+function evaluate_if_expression(ie::IfExpression)
+    if is_truthy(evaluate(ie.condition))
+        return evaluate(ie.consequence)
+    elseif !isnothing(ie.alternative)
+        return evaluate(ie.alternative)
+    else
+        return _NULL
+    end
+end
+
+is_truthy(::Object) = true
+is_truthy(b::BooleanObj) = b.value
+is_truthy(::NullObj) = false

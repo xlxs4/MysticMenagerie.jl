@@ -18,7 +18,7 @@
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.Object
 
-    test_integer_object(evaluated, expected)
+    test_object(evaluated, expected)
 end end
 
 @testset "Test evaluating BooleanLiteral" begin for (code, expected) in [
@@ -45,5 +45,5 @@ end end
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.Object
 
-    test_boolean_object(evaluated, expected)
+    test_object(evaluated, expected)
 end end

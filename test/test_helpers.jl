@@ -64,12 +64,13 @@ function parse_from_code!(code::String)
     return l, p, program
 end
 
-function test_integer_object(object::m.Object, expected::Int64)
+test_object(object::m.Object, ::Nothing) = @test object === m._NULL
+function test_object(object::m.Object, expected::Int64)
     @test object isa m.IntegerObj
     @test object.value == expected
 end
 
-function test_boolean_object(object::m.Object, expected::Bool)
+function test_object(object::m.Object, expected::Bool)
     @test object isa m.BooleanObj
     @test object.value == expected
 end
