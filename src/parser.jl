@@ -134,7 +134,7 @@ function parse_block_statement!(p::Parser)
 end
 
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
-parse_boolean(p::Parser) = Boolean(p.current_token, p.current_token.type == TRUE)
+parse_boolean(p::Parser) = BooleanLiteral(p.current_token, p.current_token.type == TRUE)
 
 function parse_integer_literal!(p::Parser)
     try

@@ -1,26 +1,28 @@
 abstract type Object end
 
+Base.show(io::IO, object::Object) = print(io, string(object))
+
 type(::Object) = error("type is not defined in the concrete type")
 
-const INTEGER = "INTEGER"
-const BOOLEAN = "BOOLEAN"
-const NULL = "NULL"
+const INTEGER_OBJ = "INTEGER"
+const BOOLEAN_OBJ = "BOOLEAN"
+const NULL_OBJ = "NULL"
 
-struct Integer <: Object
+struct IntegerObj <: Object
     value::Int64
 end
 
-type(::MysticMenagerie.Integer) = INTEGER
-Base.string(i::MysticMenagerie.Integer) = string(i.value)
+type(::MysticMenagerie.IntegerObj) = INTEGER_OBJ
+Base.string(i::MysticMenagerie.IntegerObj) = string(i.value)
 
-struct Boolean <: Object
+struct BooleanObj <: Object
     value::Bool
 end
 
-type(::Boolean) = BOOLEAN
-Base.string(b::Boolean) = string(b.value)
+type(::BooleanObj) = BOOLEAN_OBJ
+Base.string(b::BooleanObj) = string(b.value)
 
-struct Null <: Object end
+struct NullObj <: Object end
 
-type(::Null) = NULL
-Base.string(n::Null) = "null"
+type(::NullObj) = NULL_OBJ
+Base.string(n::NullObj) = "null"

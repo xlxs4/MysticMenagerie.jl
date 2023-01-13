@@ -35,6 +35,7 @@ function start_repl()
             continue
         end
 
-        println(program)
+        evaluated = evaluate(program)
+        !isnothing(evaluated) && println(evaluated)
     end
 end
