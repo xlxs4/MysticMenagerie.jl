@@ -77,6 +77,8 @@ end
 
 test_object(object::m.Object, expected::String) = @test object.message == expected
 
+test_object(object::m.StringObj, expected::String) = @test object.value == expected
+
 function test_object(object::m.FunctionObj, expected_parameter::String,
                      expected_body::String)
     @test length(object.parameters) == 1

@@ -48,6 +48,15 @@ end end
     test_object(evaluated, expected)
 end end
 
+@testset "Test evaluating StringLiteral" begin for (code, expected) in [
+    ("\"Hello world!\"", "Hello world!")
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.StringObj
+
+    test_object(evaluated, expected)
+end end
+
 @testset "Test evaluating FunctionLiteral" begin for (code, expected_parameter, expected_body) in [
     ("fn(x) { x + 2; };", "x", "(x + 2)")
 ]

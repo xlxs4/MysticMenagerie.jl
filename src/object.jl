@@ -6,6 +6,7 @@ type(::Object) = error("type is not defined in the concrete type")
 
 const INTEGER_OBJ = "INTEGER"
 const BOOLEAN_OBJ = "BOOLEAN"
+const STRING_OBJ = "STRING"
 const NULL_OBJ = "NULL"
 const RETURN_VALUE = "RETURN_VALUE"
 const ERROR_OBJ = "ERROR"
@@ -24,6 +25,13 @@ end
 
 type(::BooleanObj) = BOOLEAN_OBJ
 Base.string(b::BooleanObj) = string(b.value)
+
+struct StringObj <: Object
+    value::String
+end
+
+type(::StringObj) = STRING_OBJ
+Base.string(s::StringObj) = "\"" * string(s.value) * "\""
 
 struct NullObj <: Object end
 

@@ -27,6 +27,7 @@ end
 
 evaluate(node::IntegerLiteral, env::Environment) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral, env::Environment) = node.value ? _TRUE : _FALSE
+evaluate(node::StringLiteral, env::Environment) = StringObj(node.value)
 function evaluate(node::FunctionLiteral, env::Environment)
     FunctionObj(node.parameters, node.body, env)
 end
