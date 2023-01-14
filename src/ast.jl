@@ -39,6 +39,24 @@ expression_node(::IntegerLiteral) = nothing
 token_literal(il::IntegerLiteral) = il.token.literal
 Base.string(il::IntegerLiteral) = token_literal(il)
 
+struct BooleanLiteral <: Expression
+    token::Token
+    value::Bool
+end
+
+expression_node(::BooleanLiteral) = nothing
+token_literal(b::BooleanLiteral) = b.token.literal
+Base.string(b::BooleanLiteral) = token_literal(b)
+
+struct StringLiteral <: Expression
+    token::Token
+    value::String
+end
+
+expression_node(::StringLiteral) = nothing
+token_literal(s::StringLiteral) = s.token.literal
+Base.string(s::StringLiteral) = "\"" * string(s.value) * "\""
+
 struct PrefixExpression{T <: Expression} <: Expression
     token::Token
     operator::String
@@ -61,15 +79,6 @@ token_literal(ie::InfixExpression) = ie.token.literal
 function Base.string(ie::InfixExpression)
     return "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
-
-struct BooleanLiteral <: Expression
-    token::Token
-    value::Bool
-end
-
-expression_node(::BooleanLiteral) = nothing
-token_literal(b::BooleanLiteral) = b.token.literal
-Base.string(b::BooleanLiteral) = token_literal(b)
 
 struct BlockStatement <: Statement
     token::Token

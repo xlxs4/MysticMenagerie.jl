@@ -22,6 +22,22 @@ end end
     test_literal_expression(il, value)
 end end
 
+@testset "Test parsing StringLiteral" begin for (code, value) in [
+    ("\"hello world\";", "hello world")
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.StringLiteral
+    @test expr.value == value
+end end
+
 @testset "Test parsing FunctionLiteral" begin for (code) in [("fn(x, y) { x + y; }")]
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)

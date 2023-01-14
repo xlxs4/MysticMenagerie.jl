@@ -149,6 +149,8 @@ function parse_integer_literal!(p::Parser)
     end
 end
 
+parse_string_literal(p::Parser) = StringLiteral(p.current_token, p.current_token.literal)
+
 function parse_prefix_expression!(p::Parser)
     token = p.current_token
     operator = p.current_token.literal
@@ -277,6 +279,7 @@ function Parser(l::Lexer)
 
     register_prefix!(p, IDENT, parse_identifier)
     register_prefix!(p, INT, parse_integer_literal!)
+    register_prefix!(p, STRING, parse_string_literal)
     register_prefix!(p, BANG, parse_prefix_expression!)
     register_prefix!(p, MINUS, parse_prefix_expression!)
     register_prefix!(p, TRUE, parse_boolean)
