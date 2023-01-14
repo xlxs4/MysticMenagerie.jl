@@ -14,6 +14,7 @@
         return 1;
     }
     """, "unknown operator: BOOLEAN + BOOLEAN"),
+    ("\"Hello\" - \"World!\"", "unknown operator: STRING - STRING"),
 ]
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.Object

@@ -12,6 +12,15 @@
     test_object(evaluated, expected)
 end end
 
+@testset "Test String concatenation" begin for (code, expected) in [
+    ("\"Hello\" + \" \" + \"World!\"", "Hello World!")
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.StringObj
+
+    test_object(evaluated, expected)
+end end
+
 @testset "Test IfExpression" begin for (code, expected) in [
     ("if (true) { 10 }", 10),
     ("if (false) { 10 }", nothing),

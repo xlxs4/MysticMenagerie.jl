@@ -190,6 +190,16 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
     elseif operator == "!="
         return left.value != right.value ? _TRUE : _FALSE
     else
-        return ErrorObj("unknown operator: " * type(left) * operator * type(right))
+        return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
+                        type(right))
+    end
+end
+
+function evaluate_infix_expression(operator::String, left::StringObj, right::StringObj)
+    if operator != "+"
+        return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
+                        type(right))
+    else
+        return StringObj(left.value * right.value)
     end
 end
