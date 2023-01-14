@@ -66,6 +66,8 @@ function next_token!(l::Lexer)
         token = Token(LBRACE, "{")
     elseif ch == '}'
         token = Token(RBRACE, "}")
+    elseif ch == '"'
+        return read_string!(l)
     elseif isnothing(ch)
         token = Token(EOF, "")
     elseif is_ident_letter(ch)
@@ -103,6 +105,18 @@ end
 function read_number!(l::Lexer)
     literal = read_literal!(l, is_valid_digit)
     return Token(INT, literal)
+end
+
+function read_string!(l::Lexer)
+    read_char!(l)
+
+    chars = Char[]
+    while read_char(l) != '"' && !isnothing(read_char(l))
+        push!(chars, read_char(l))
+        read_char!(l)
+    end
+    read_char!(l)
+    return Token(STRING, join(chars, ""))
 end
 
 is_ident_letter(ch) = !isnothing(ch) && ('a' <= ch <= 'z' || 'A' <= ch <= 'Z' || ch == '_')

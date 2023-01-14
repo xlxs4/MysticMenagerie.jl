@@ -3,6 +3,7 @@
     EOF
     IDENT
     INT
+    STRING
     ASSIGN
     PLUS
     MINUS

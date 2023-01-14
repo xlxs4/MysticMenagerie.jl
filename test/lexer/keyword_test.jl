@@ -8,6 +8,9 @@
                 };
 
                 let result = add(five, ten);
+
+                "foobar"
+                "foo bar"
                 """)
     expected = map(x -> m.Token(x...),
                    [
@@ -47,6 +50,9 @@
                        (m.IDENT, "ten"),
                        (m.RPAREN, ")"),
                        (m.SEMICOLON, ";"),
+                       (m.STRING, "foobar"),
+                       (m.STRING, "foo bar"),
+                       (m.EOF, ""),
                    ])
 
     for token in expected
