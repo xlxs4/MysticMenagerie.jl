@@ -27,6 +27,54 @@ end
 
 evaluate(node::IntegerLiteral, env::Environment) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral, env::Environment) = node.value ? _TRUE : _FALSE
+function evaluate(node::FunctionLiteral, env::Environment)
+    FunctionObj(node.parameters, node.body, env)
+end
+
+function evaluate(node::CallExpression, env::Environment)
+    fn = evaluate(node.fn, env)
+    fn isa ErrorObj && return fn
+
+    arguments = evaluate(node.arguments, env)
+    if length(arguments) == 1 && arguments[1] isa ErrorObj
+        return arguments[1]
+    end
+
+    return apply_function(fn, arguments)
+end
+
+function evaluate(node::Vector{Expression}, env::Environment)
+    result = Object[]
+    for expression in node
+        evaluated = evaluate(expression, env)
+        evaluated isa ErrorObj && return [evaluated]
+
+        push!(result, evaluated)
+    end
+    return result
+end
+
+apply_function(fn::Object, ::Vector{Object}) = ErrorObj("not a function: " * type(fn))
+function apply_function(fn::FunctionObj, arguments::Vector{Object})
+    if length(fn.parameters) != length(arguments)
+        return ErrorObj("argument error: wrong number of arguments: got $(length(arguments))")
+    end
+    extended_env = extend_function_environment(fn, arguments)
+    evaluated = evaluate(fn.body, extended_env)
+    return unwrap_return_value(evaluated)
+end
+
+function extend_function_environment(fn::FunctionObj, arguments::Vector{Object})
+    env = Environment(fn.env)
+    for (parameter, argument) in zip(fn.parameters, arguments)
+        set!(env, parameter.value, argument)
+    end
+    return env
+end
+
+function unwrap_return_value(object::Object)
+    return object isa ReturnValue ? object.value : object
+end
 
 function evaluate(node::IfExpression, env::Environment)
     condition = evaluate(node.condition, env)
@@ -73,6 +121,7 @@ function evaluate(node::LetStatement, env::Environment)
         return val
     end
     set!(env, node.name.value, val)
+    return val
 end
 
 function evaluate(node::Identifier, env::Environment)

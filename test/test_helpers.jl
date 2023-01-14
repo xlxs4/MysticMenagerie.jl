@@ -77,6 +77,13 @@ end
 
 test_object(object::m.Object, expected::String) = @test object.message == expected
 
+function test_object(object::m.FunctionObj, expected_parameter::String,
+                     expected_body::String)
+    @test length(object.parameters) == 1
+    @test string(object.parameters[1]) == expected_parameter
+    @test string(object.body) == expected_body
+end
+
 function evaluate_from_code!(code::String)
     _, _, program = parse_from_code!(code)
     env = m.Environment()

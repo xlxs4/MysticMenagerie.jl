@@ -9,6 +9,7 @@ const BOOLEAN_OBJ = "BOOLEAN"
 const NULL_OBJ = "NULL"
 const RETURN_VALUE = "RETURN_VALUE"
 const ERROR_OBJ = "ERROR"
+const FUNCTION_OBJ = "FUNCTION"
 
 struct IntegerObj <: Object
     value::Int64
@@ -45,8 +46,29 @@ Base.string(e::ErrorObj) = "ERROR: " * e.message
 
 struct Environment{T <: Object}
     store::Dict{String, T}
+    outer::Optional{Environment}
 end
 
-Environment() = Environment(Dict{String, Object}())
-get(env::Environment, name::String) = Base.get(env.store, name, nothing)
+Environment() = Environment(Dict{String, Object}(), nothing)
+Environment(outer::Environment) = Environment(Dict{String, Object}(), outer)
+
+function get(env::Environment, name::String)
+    result = Base.get(env.store, name, nothing)
+    if isnothing(result) && !isnothing(env.outer)
+        return get(env.outer, name)
+    end
+    return result
+end
+
 set!(env::Environment, name::String, value::Object) = push!(env.store, name => value)
+
+struct FunctionObj <: Object
+    parameters::Vector{Identifier}
+    body::BlockStatement
+    env::Environment
+end
+
+type(::FunctionObj) = FUNCTION_OBJ
+function Base.string(f::FunctionObj)
+    return "fn(" * join(map(string, f.parameters), ", ") * ") {\n" * string(f.body) * "\n}"
+end

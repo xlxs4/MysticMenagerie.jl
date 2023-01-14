@@ -47,3 +47,13 @@ end end
 
     test_object(evaluated, expected)
 end end
+
+@testset "Test evaluating FunctionLiteral" begin for (code, expected_parameter, expected_body) in [
+    ("fn(x) { x + 2; };", "x", "(x + 2)")
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    @test evaluated isa m.FunctionObj
+    test_object(evaluated, expected_parameter, expected_body)
+end end
