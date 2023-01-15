@@ -8,3 +8,4 @@ include("test_helpers.jl")
 @time begin @time @testset "Parser" begin include("parser/parser_test.jl") end end
 @time begin @time @testset "AST" begin include("ast/ast_test.jl") end end
 @time begin @time @testset "Evaluator" begin include("evaluator/evaluator_test.jl") end end
+@time begin @time @testset "Builtin" begin include("builtin/builtin_test.jl") end end
