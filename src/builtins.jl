@@ -4,8 +4,11 @@ const BUILTINS = Dict{String, BuiltinObj}("len" => BuiltinObj(function (args::Ob
                                                                   end
 
                                                                   arg = args[1]
-                                                                  arg isa StringObj &&
+                                                                  if arg isa StringObj
                                                                       return IntegerObj(length(arg.value))
+                                                                  elseif arg isa ArrayObj
+                                                                      return IntegerObj(length(arg.elements))
+                                                                  end
 
                                                                   return ErrorObj("argument to `len` not supported, got $(type(arg))")
                                                               end))
