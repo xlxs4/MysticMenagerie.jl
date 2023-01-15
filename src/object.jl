@@ -12,6 +12,7 @@ const RETURN_VALUE = "RETURN_VALUE"
 const ERROR_OBJ = "ERROR"
 const FUNCTION_OBJ = "FUNCTION"
 const BUILTIN_OBJ = "BUILTIN"
+const ARRAY_OBJ = "ARRAY"
 
 struct IntegerObj <: Object
     value::Int64
@@ -88,3 +89,10 @@ end
 
 type(::BuiltinObj) = BUILTIN_OBJ
 Base.string(b::BuiltinObj) = "builtin function"
+
+struct ArrayObj <: Object
+    elements::Vector{Object}
+end
+
+type(::ArrayObj) = ARRAY_OBJ
+Base.string(a::ArrayObj) = "[" * join(map(string, a.elements), ", ") * "["

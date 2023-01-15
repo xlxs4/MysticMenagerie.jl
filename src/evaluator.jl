@@ -32,6 +32,14 @@ function evaluate(node::FunctionLiteral, env::Environment)
     FunctionObj(node.parameters, node.body, env)
 end
 
+function evaluate(node::ArrayLiteral, env::Environment)
+    elements = evaluate(node.elements, env)
+    if length(elements) == 1 && elements[1] isa ErrorObj
+        return elements[1]
+    end
+    return ArrayObj(elements)
+end
+
 function evaluate(node::CallExpression, env::Environment)
     fn = evaluate(node.fn, env)
     fn isa ErrorObj && return fn

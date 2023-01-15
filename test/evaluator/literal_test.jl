@@ -66,3 +66,17 @@ end end
     @test evaluated isa m.FunctionObj
     test_object(evaluated, expected_parameter, expected_body)
 end end
+
+@testset "Test evaluating ArrayLiteral" begin for (code) in [
+    ("[1, 2 * 2, 3 + 3]")
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    @test evaluated isa m.ArrayObj
+    @test length(evaluated.elements) == 3
+
+    test_object(evaluated.elements[1], 1)
+    test_object(evaluated.elements[2], 4)
+    test_object(evaluated.elements[3], 6)
+end end
