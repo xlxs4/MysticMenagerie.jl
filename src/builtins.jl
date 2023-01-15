@@ -52,4 +52,27 @@ const BUILTINS = Dict{String, BuiltinObj}("len" => BuiltinObj(function (args::Ob
                                                                    else
                                                                        return ErrorObj("argument to `last` not supported, got $(type(arg))")
                                                                    end
+                                                               end),
+                                          "rest" => BuiltinObj(function (args::Object...)
+                                                                   if length(args) != 1
+                                                                       return ErrorObj("wrong number of arguments. got $(length(args)), want 1")
+                                                                   end
+
+                                                                   arg = args[1]
+                                                                   if arg isa StringObj
+                                                                       if length(arg.value) >
+                                                                          0
+                                                                           _, start = iterate(arg.value)
+                                                                           return StringObj(arg.value[start:end])
+                                                                       else
+                                                                           return _NULL
+                                                                       end
+                                                                   elseif arg isa ArrayObj
+                                                                       return length(arg.elements) >
+                                                                              0 ?
+                                                                              ArrayObj(arg.elements[2:end]) :
+                                                                              _NULL
+                                                                   else
+                                                                       return ErrorObj("argument to `rest` not supported, got $(type(arg))")
+                                                                   end
                                                                end))

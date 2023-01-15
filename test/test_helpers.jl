@@ -76,7 +76,7 @@ function test_object(object::m.Object, expected::Bool)
 end
 
 test_object(object::m.Object, expected::String) = @test object.message == expected
-
+test_object(::m.NullObj, expected::String) = @test expected == ""
 test_object(object::m.StringObj, expected::String) = @test object.value == expected
 
 function test_object(object::m.FunctionObj, expected_parameter::String,
@@ -84,6 +84,14 @@ function test_object(object::m.FunctionObj, expected_parameter::String,
     @test length(object.parameters) == 1
     @test string(object.parameters[1]) == expected_parameter
     @test string(object.body) == expected_body
+end
+
+function test_object(object::m.ArrayObj, expected::Vector)
+    @test length(object.elements) == length(expected)
+
+    for (obj, exp) in zip(object.elements, expected)
+        test_object(obj, exp)
+    end
 end
 
 function evaluate_from_code!(code::String)
