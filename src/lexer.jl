@@ -41,6 +41,10 @@ function next_token!(l::Lexer)
         token = Token(LPAREN, "(")
     elseif ch == ')'
         token = Token(RPAREN, ")")
+    elseif ch == '['
+        token = Token(LBRACKET, "[")
+    elseif ch == ']'
+        token = Token(RBRACKET, "]")
     elseif ch == ','
         token = Token(COMMA, ",")
     elseif ch == '+'
