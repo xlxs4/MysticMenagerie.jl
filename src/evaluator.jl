@@ -52,6 +52,16 @@ function evaluate(node::CallExpression, env::Environment)
     return apply_function(fn, arguments)
 end
 
+function evaluate(node::IndexExpression, env::Environment)
+    left = evaluate(node.left, env)
+    left isa ErrorObj && return left
+
+    index = evaluate(node.index, env)
+    index isa ErrorObj && return index
+
+    return evaluate_index_expression(left, index)
+end
+
 function evaluate(node::Vector{Expression}, env::Environment)
     result = Object[]
     for expression in node
@@ -215,4 +225,16 @@ function evaluate_infix_expression(operator::String, left::StringObj, right::Str
     else
         return StringObj(left.value * right.value)
     end
+end
+
+function evaluate_index_expression(left::Object, ::Object)
+    ErrorObj("index operator not supported: " * type(left))
+end
+function evaluate_index_expression(::ArrayObj, index::Object)
+    ErrorObj("unsupported index type: " * type(index))
+end
+function evaluate_index_expression(left::ArrayObj, index::IntegerObj)
+    index = index.value
+    max_index = length(left.elements) - 1
+    return 0 <= index <= max_index ? left.elements[index + 1] : _NULL
 end
