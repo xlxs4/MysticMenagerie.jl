@@ -9,16 +9,16 @@
     INDEX
 end
 
-const PRECEDENCES = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
-                                                     NOT_EQ => EQUALS,
-                                                     LT => LESSGREATER,
-                                                     GT => LESSGREATER,
-                                                     PLUS => SUM,
-                                                     MINUS => SUM,
-                                                     SLASH => PRODUCT,
-                                                     ASTERISK => PRODUCT,
-                                                     LPAREN => CALL,
-                                                     LBRACKET => INDEX)
+const PRECEDENCES = Base.ImmutableDict(EQ => EQUALS,
+                                       NOT_EQ => EQUALS,
+                                       LT => LESSGREATER,
+                                       GT => LESSGREATER,
+                                       PLUS => SUM,
+                                       MINUS => SUM,
+                                       SLASH => PRODUCT,
+                                       ASTERISK => PRODUCT,
+                                       LPAREN => CALL,
+                                       LBRACKET => INDEX)
 
 mutable struct Parser
     lexer::Lexer
@@ -290,33 +290,32 @@ function parse_program!(p::Parser)
     return program
 end
 
+const PREFIX_FUNCTIONS = Dict{TokenType, Function}(IDENT => parse_identifier,
+                                         INT => parse_integer_literal!,
+                                         STRING => parse_string_literal,
+                                         BANG => parse_prefix_expression!,
+                                         MINUS => parse_prefix_expression!,
+                                         TRUE => parse_boolean,
+                                         FALSE => parse_boolean,
+                                         LPAREN => parse_grouped_expression!,
+                                         IF => parse_if_expression!,
+                                         FUNCTION => parse_function_literal!,
+                                         LBRACKET => parse_array_literal!)
+
+const INFIX_FUNCTIONS = Dict{TokenType, Function}(PLUS => parse_infix_expression!,
+                                        MINUS => parse_infix_expression!,
+                                        SLASH => parse_infix_expression!,
+                                        ASTERISK => parse_infix_expression!,
+                                        EQ => parse_infix_expression!,
+                                        NOT_EQ => parse_infix_expression!,
+                                        LT => parse_infix_expression!,
+                                        GT => parse_infix_expression!,
+                                        LPAREN => parse_call_expression!,
+                                        LBRACKET => parse_index_expression!)
+
 function Parser(l::Lexer)
     current_token = next_token!(l)
     peek_token = next_token!(l)
-    p = Parser(l, String[], current_token, peek_token, Dict{TokenType, Function}(),
-               Dict{TokenType, Function}())
-
-    register_prefix!(p, IDENT, parse_identifier)
-    register_prefix!(p, INT, parse_integer_literal!)
-    register_prefix!(p, STRING, parse_string_literal)
-    register_prefix!(p, BANG, parse_prefix_expression!)
-    register_prefix!(p, MINUS, parse_prefix_expression!)
-    register_prefix!(p, TRUE, parse_boolean)
-    register_prefix!(p, FALSE, parse_boolean)
-    register_prefix!(p, LPAREN, parse_grouped_expression!)
-    register_prefix!(p, IF, parse_if_expression!)
-    register_prefix!(p, FUNCTION, parse_function_literal!)
-    register_prefix!(p, LBRACKET, parse_array_literal!)
-
-    register_infix!(p, PLUS, parse_infix_expression!)
-    register_infix!(p, MINUS, parse_infix_expression!)
-    register_infix!(p, SLASH, parse_infix_expression!)
-    register_infix!(p, ASTERISK, parse_infix_expression!)
-    register_infix!(p, EQ, parse_infix_expression!)
-    register_infix!(p, NOT_EQ, parse_infix_expression!)
-    register_infix!(p, LT, parse_infix_expression!)
-    register_infix!(p, GT, parse_infix_expression!)
-    register_infix!(p, LPAREN, parse_call_expression!)
-    register_infix!(p, LBRACKET, parse_index_expression!)
+    p = Parser(l, String[], current_token, peek_token, PREFIX_FUNCTIONS, INFIX_FUNCTIONS)
     return p
 end
