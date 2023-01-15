@@ -65,6 +65,10 @@ function apply_function(fn::FunctionObj, arguments::Vector{Object})
     return unwrap_return_value(evaluated)
 end
 
+function apply_function(fn::BuiltinObj, arguments::Vector{Object})
+    return fn.fn(arguments...)
+end
+
 function extend_function_environment(fn::FunctionObj, arguments::Vector{Object})
     env = Environment(fn.env)
     for (parameter, argument) in zip(fn.parameters, arguments)
@@ -127,10 +131,11 @@ end
 
 function evaluate(node::Identifier, env::Environment)
     val = get(env, node.value)
-    if isnothing(val)
-        return ErrorObj("identifier not found: $(node.value)")
-    end
-    return val
+    !isnothing(val) && return val
+
+    node.value ∉ keys(BUILTINS) && return ErrorObj("identifier not found: $(node.value)")
+
+    return BUILTINS[node.value]
 end
 
 function evaluate_prefix_expression(operator::String, right::Object)

@@ -11,6 +11,7 @@ const NULL_OBJ = "NULL"
 const RETURN_VALUE = "RETURN_VALUE"
 const ERROR_OBJ = "ERROR"
 const FUNCTION_OBJ = "FUNCTION"
+const BUILTIN_OBJ = "BUILTIN"
 
 struct IntegerObj <: Object
     value::Int64
@@ -80,3 +81,10 @@ type(::FunctionObj) = FUNCTION_OBJ
 function Base.string(f::FunctionObj)
     return "fn(" * join(map(string, f.parameters), ", ") * ") {\n" * string(f.body) * "\n}"
 end
+
+struct BuiltinObj <: Object
+    fn::Function
+end
+
+type(::BuiltinObj) = BUILTIN_OBJ
+Base.string(b::BuiltinObj) = "builtin function"
