@@ -291,27 +291,27 @@ function parse_program!(p::Parser)
 end
 
 const PREFIX_FUNCTIONS = Dict{TokenType, Function}(IDENT => parse_identifier,
-                                         INT => parse_integer_literal!,
-                                         STRING => parse_string_literal,
-                                         BANG => parse_prefix_expression!,
-                                         MINUS => parse_prefix_expression!,
-                                         TRUE => parse_boolean,
-                                         FALSE => parse_boolean,
-                                         LPAREN => parse_grouped_expression!,
-                                         IF => parse_if_expression!,
-                                         FUNCTION => parse_function_literal!,
-                                         LBRACKET => parse_array_literal!)
+                                                   INT => parse_integer_literal!,
+                                                   STRING => parse_string_literal,
+                                                   BANG => parse_prefix_expression!,
+                                                   MINUS => parse_prefix_expression!,
+                                                   TRUE => parse_boolean,
+                                                   FALSE => parse_boolean,
+                                                   LPAREN => parse_grouped_expression!,
+                                                   IF => parse_if_expression!,
+                                                   FUNCTION => parse_function_literal!,
+                                                   LBRACKET => parse_array_literal!)
 
 const INFIX_FUNCTIONS = Dict{TokenType, Function}(PLUS => parse_infix_expression!,
-                                        MINUS => parse_infix_expression!,
-                                        SLASH => parse_infix_expression!,
-                                        ASTERISK => parse_infix_expression!,
-                                        EQ => parse_infix_expression!,
-                                        NOT_EQ => parse_infix_expression!,
-                                        LT => parse_infix_expression!,
-                                        GT => parse_infix_expression!,
-                                        LPAREN => parse_call_expression!,
-                                        LBRACKET => parse_index_expression!)
+                                                  MINUS => parse_infix_expression!,
+                                                  SLASH => parse_infix_expression!,
+                                                  ASTERISK => parse_infix_expression!,
+                                                  EQ => parse_infix_expression!,
+                                                  NOT_EQ => parse_infix_expression!,
+                                                  LT => parse_infix_expression!,
+                                                  GT => parse_infix_expression!,
+                                                  LPAREN => parse_call_expression!,
+                                                  LBRACKET => parse_index_expression!)
 
 function Parser(l::Lexer)
     current_token = next_token!(l)
