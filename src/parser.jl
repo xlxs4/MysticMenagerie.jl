@@ -6,6 +6,7 @@
     PRODUCT
     PREFIX
     CALL
+    INDEX
 end
 
 const PRECEDENCES = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
@@ -16,7 +17,8 @@ const PRECEDENCES = Dict{TokenType, ExpressionOrder}(EQ => EQUALS,
                                                      MINUS => SUM,
                                                      SLASH => PRODUCT,
                                                      ASTERISK => PRODUCT,
-                                                     LPAREN => CALL)
+                                                     LPAREN => CALL,
+                                                     LBRACKET => INDEX)
 
 mutable struct Parser
     lexer::Lexer
@@ -233,16 +235,26 @@ function parse_function_literal!(p::Parser)
     return FunctionLiteral(token, parameters, body)
 end
 
+function parse_array_literal!(p::Parser)
+    token = p.current_token
+    elements = parse_expression_list!(p, RBRACKET)
+    return ArrayLiteral(token, elements)
+end
+
 function parse_call_expression!(p::Parser, fn::Expression)
     token = p.current_token
     arguments = parse_expression_list!(p, RPAREN)
     return CallExpression(token, fn, arguments)
 end
 
-function parse_array_literal!(p::Parser)
+function parse_index_expression!(p::Parser, left::Expression)
     token = p.current_token
-    elements = parse_expression_list!(p, RBRACKET)
-    return ArrayLiteral(token, elements)
+    next_token!(p)
+    index = parse_expression!(p, LOWEST)
+
+    !expect_peek!(p, RBRACKET) && return nothing
+
+    return IndexExpression(token, left, index)
 end
 
 function parse_expression_list!(p::Parser, end_token::TokenType)
@@ -305,5 +317,6 @@ function Parser(l::Lexer)
     register_infix!(p, LT, parse_infix_expression!)
     register_infix!(p, GT, parse_infix_expression!)
     register_infix!(p, LPAREN, parse_call_expression!)
+    register_infix!(p, LBRACKET, parse_index_expression!)
     return p
 end

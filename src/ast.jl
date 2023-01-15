@@ -137,7 +137,19 @@ end
 expression_node(::CallExpression) = nothing
 token_literal(ce::CallExpression) = ce.token.literal
 function Base.string(ce::CallExpression)
-    string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
+    return string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
+end
+
+struct IndexExpression{T <: Expression, N <: Expression} <: Expression
+    token::Token
+    left::T
+    index::N
+end
+
+expression_node(::IndexExpression) = nothing
+token_literal(ie::IndexExpression) = ie.token.literal
+function Base.string(ie::IndexExpression)
+    return "(" * string(ie.left) * "[" * string(ie.index) * "])"
 end
 
 struct LetStatement{T <: Expression} <: Statement

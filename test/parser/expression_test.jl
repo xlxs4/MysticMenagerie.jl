@@ -182,3 +182,21 @@ end end
     test_infix_expression(expr.arguments[2], left[1], operator[1], right[1])
     test_infix_expression(expr.arguments[3], left[2], operator[2], right[2])
 end end
+
+@testset "Test parsing IndexExpression" begin for (code, left, operator, right) in [
+    ("myArray[1 + 1]", 1, "+", 1)
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    expr = stmt.expression
+    @test expr isa m.IndexExpression
+
+    test_identifier(expr.left, "myArray")
+    test_infix_expression(expr.index, left, operator, right)
+end end
