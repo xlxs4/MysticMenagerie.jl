@@ -82,3 +82,24 @@ end end
         test_literal_expression(parameter, expected_parameter)
     end
 end end
+
+@testset "Test parsing ArrayLiteral" begin for (code) in [
+    ("[1, 2 * 2, 3 + 3]")
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    al = stmt.expression
+    @test al isa m.ArrayLiteral
+
+    @test length(al.elements) == 3
+    test_literal_expression(al.elements[1], 1)
+
+    test_infix_expression(al.elements[2], 2, "*", 2)
+    test_infix_expression(al.elements[3], 3, "+", 3)
+end end

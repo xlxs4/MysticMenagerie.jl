@@ -233,31 +233,38 @@ function parse_function_literal!(p::Parser)
     return FunctionLiteral(token, parameters, body)
 end
 
-function parse_call_arguments!(p::Parser)
-    arguments = Expression[]
-    if p.peek_token.type == RPAREN
+function parse_call_expression!(p::Parser, fn::Expression)
+    token = p.current_token
+    arguments = parse_expression_list!(p, RPAREN)
+    return CallExpression(token, fn, arguments)
+end
+
+function parse_array_literal!(p::Parser)
+    token = p.current_token
+    elements = parse_expression_list!(p, RBRACKET)
+    return ArrayLiteral(token, elements)
+end
+
+function parse_expression_list!(p::Parser, end_token::TokenType)
+    expressions = Expression[]
+
+    if p.peek_token.type == end_token
         next_token!(p)
-        return arguments
+        return expressions
     end
 
     next_token!(p)
-    push!(arguments, parse_expression!(p, LOWEST))
+    push!(expressions, parse_expression!(p, LOWEST))
 
     while p.peek_token.type == COMMA
         next_token!(p)
         next_token!(p)
-        push!(arguments, parse_expression!(p, LOWEST))
+        push!(expressions, parse_expression!(p, LOWEST))
     end
 
-    !expect_peek!(p, RPAREN) && return nothing
+    !expect_peek!(p, end_token) && return nothing
 
-    return arguments
-end
-
-function parse_call_expression!(p::Parser, fn::Expression)
-    token = p.current_token
-    arguments = parse_call_arguments!(p)
-    return CallExpression(token, fn, arguments)
+    return expressions
 end
 
 function parse_program!(p::Parser)
@@ -287,6 +294,7 @@ function Parser(l::Lexer)
     register_prefix!(p, LPAREN, parse_grouped_expression!)
     register_prefix!(p, IF, parse_if_expression!)
     register_prefix!(p, FUNCTION, parse_function_literal!)
+    register_prefix!(p, LBRACKET, parse_array_literal!)
 
     register_infix!(p, PLUS, parse_infix_expression!)
     register_infix!(p, MINUS, parse_infix_expression!)

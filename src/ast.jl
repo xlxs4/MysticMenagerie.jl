@@ -113,7 +113,19 @@ end
 expression_node(::FunctionLiteral) = nothing
 token_literal(fl::FunctionLiteral) = fl.token.literal
 function Base.string(fl::FunctionLiteral)
-    fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " * string(fl.body)
+    return fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " *
+           string(fl.body)
+end
+
+struct ArrayLiteral <: Expression
+    token::Token
+    elements::Vector{Expression}
+end
+
+expression_node(::ArrayLiteral) = nothing
+token_literal(al::ArrayLiteral) = al.token.literal
+function Base.string(al::ArrayLiteral)
+    return "[" * join(map(string, al.elements), ", ") * "]"
 end
 
 struct CallExpression{T <: Expression} <: Expression
@@ -137,7 +149,7 @@ end
 statement_node(::LetStatement) = nothing
 token_literal(ls::LetStatement) = ls.token.literal
 function Base.string(ls::LetStatement)
-    ls.token.literal * " " * string(ls.name) * " = " * string(ls.value) * ";"
+    return ls.token.literal * " " * string(ls.name) * " = " * string(ls.value) * ";"
 end
 
 struct ReturnStatement{T <: Expression} <: Statement
