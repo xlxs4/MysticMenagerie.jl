@@ -95,4 +95,4 @@ struct ArrayObj <: Object
 end
 
 type(::ArrayObj) = ARRAY_OBJ
-Base.string(a::ArrayObj) = "[" * join(map(string, a.elements), ", ") * "["
+Base.string(a::ArrayObj) = "[" * join(map(string, a.elements), ", ") * "]"
