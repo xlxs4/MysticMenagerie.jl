@@ -101,4 +101,13 @@ const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (args::Object..
                                                              else
                                                                  return ErrorObj("argument to `push` must be ARRAY, got $(type(array))")
                                                              end
+                                                         end),
+                                    "puts" => BuiltinObj(function (args::Object...)
+                                                             for arg in args
+                                                                 if arg isa StringObj
+                                                                     println(arg.value)
+                                                                 else
+                                                                     println(arg)
+                                                                 end
+                                                             end
                                                          end))

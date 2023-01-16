@@ -92,6 +92,7 @@ function get(env::Environment, name::String)
 end
 
 set!(env::Environment, name::String, value::Object) = push!(env.store, name => value)
+set!(env::Environment, name::String, ::Nothing) = push!(env.store, name => _NULL)
 
 struct FunctionObj <: Object
     parameters::Vector{Identifier}
