@@ -86,4 +86,19 @@ const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (args::Object..
                                                              else
                                                                  return ErrorObj("argument to `rest` not supported, got $(type(arg))")
                                                              end
+                                                         end),
+                                    "push" => BuiltinObj(function (args::Object...)
+                                                             if length(args) != 2
+                                                                 return ErrorObj("wrong number of arguments. got $(length(args)), want 2")
+                                                             end
+
+                                                             array = args[1]
+                                                             if array isa ArrayObj
+                                                                 elements = copy(array.elements)
+                                                                 push!(elements, args[2])
+
+                                                                 return ArrayObj(elements)
+                                                             else
+                                                                 return ErrorObj("argument to `push` must be ARRAY, got $(type(array))")
+                                                             end
                                                          end))
