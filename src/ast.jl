@@ -2,16 +2,9 @@ abstract type Node end
 abstract type Expression <: Node end
 abstract type Statement <: Node end
 
+token_literal(node::Node) = node.token.literal
+Base.string(node::Node) = node.token.literal
 Base.show(io::IO, node::Node) = print(io, string(node))
-
-token_literal(::Node) = error("token_literal is not defined in the concrete type")
-token_literal(::Expression) = error("token_literal is not defined in the concrete type")
-token_literal(::Statement) = error("token_literal is not defined in the concrete type")
-
-function expression_node(::Expression)
-    error("expression_node is not defined in the concrete type")
-end
-statement_node(::Statement) = error("statement_node is not defined in the concrete type")
 
 struct Program <: Node
     statements::Vector{Statement}
@@ -26,8 +19,6 @@ struct Identifier <: Expression
     value::String
 end
 
-expression_node(::Identifier) = nothing
-token_literal(id::Identifier) = id.token.literal
 Base.string(id::Identifier) = id.value
 
 struct IntegerLiteral <: Expression
@@ -35,26 +26,16 @@ struct IntegerLiteral <: Expression
     value::Int64
 end
 
-expression_node(::IntegerLiteral) = nothing
-token_literal(il::IntegerLiteral) = il.token.literal
-Base.string(il::IntegerLiteral) = token_literal(il)
-
 struct BooleanLiteral <: Expression
     token::Token
     value::Bool
 end
-
-expression_node(::BooleanLiteral) = nothing
-token_literal(b::BooleanLiteral) = b.token.literal
-Base.string(b::BooleanLiteral) = token_literal(b)
 
 struct StringLiteral <: Expression
     token::Token
     value::String
 end
 
-expression_node(::StringLiteral) = nothing
-token_literal(s::StringLiteral) = s.token.literal
 Base.string(s::StringLiteral) = "\"" * string(s.value) * "\""
 
 struct PrefixExpression{T <: Expression} <: Expression
@@ -63,8 +44,6 @@ struct PrefixExpression{T <: Expression} <: Expression
     right::T
 end
 
-expression_node(::PrefixExpression) = nothing
-token_literal(pe::PrefixExpression) = pe.token.literal
 Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
 
 struct InfixExpression{T <: Expression, N <: Expression} <: Expression
@@ -74,8 +53,6 @@ struct InfixExpression{T <: Expression, N <: Expression} <: Expression
     right::N
 end
 
-expression_node(::InfixExpression) = nothing
-token_literal(ie::InfixExpression) = ie.token.literal
 function Base.string(ie::InfixExpression)
     return "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
@@ -85,8 +62,6 @@ struct BlockStatement <: Statement
     statements::Vector{Statement}
 end
 
-statement_node(::BlockStatement) = nothing
-token_literal(bs::BlockStatement) = bs.token.literal
 Base.string(bs::BlockStatement) = join(map(string, bs.statements))
 
 struct IfExpression{T <: Expression} <: Expression
@@ -96,8 +71,6 @@ struct IfExpression{T <: Expression} <: Expression
     alternative::Optional{BlockStatement}
 end
 
-expression_node(::IfExpression) = nothing
-token_literal(ie::IfExpression) = ie.token.literal
 function Base.string(ie::IfExpression)
     left = "if (" * string(ie.condition) * ") { " * string(ie.consequence) * " } "
     return isnothing(ie.alternative) ? left :
@@ -110,8 +83,6 @@ struct FunctionLiteral <: Expression
     body::BlockStatement
 end
 
-expression_node(::FunctionLiteral) = nothing
-token_literal(fl::FunctionLiteral) = fl.token.literal
 function Base.string(fl::FunctionLiteral)
     return fl.token.literal * "(" * join(map(string, fl.parameters), ", ") * ") " *
            string(fl.body)
@@ -122,8 +93,6 @@ struct ArrayLiteral <: Expression
     elements::Vector{Expression}
 end
 
-expression_node(::ArrayLiteral) = nothing
-token_literal(al::ArrayLiteral) = al.token.literal
 function Base.string(al::ArrayLiteral)
     return "[" * join(map(string, al.elements), ", ") * "]"
 end
@@ -133,8 +102,6 @@ struct HashLiteral <: Expression
     pairs::Dict{Expression, Expression}
 end
 
-expression_node(::HashLiteral) = nothing
-token_literal(hl::HashLiteral) = hl.token.literal
 function Base.string(hl::HashLiteral)
     "{" * join(map(x -> string(x[1]) * ":" * string(x[2]), collect(hl.pairs)), ", ") * "}"
 end
@@ -145,8 +112,6 @@ struct CallExpression{T <: Expression} <: Expression
     arguments::Vector{Expression}
 end
 
-expression_node(::CallExpression) = nothing
-token_literal(ce::CallExpression) = ce.token.literal
 function Base.string(ce::CallExpression)
     return string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
 end
@@ -157,8 +122,6 @@ struct IndexExpression{T <: Expression, N <: Expression} <: Expression
     index::N
 end
 
-expression_node(::IndexExpression) = nothing
-token_literal(ie::IndexExpression) = ie.token.literal
 function Base.string(ie::IndexExpression)
     return "(" * string(ie.left) * "[" * string(ie.index) * "])"
 end
@@ -169,8 +132,6 @@ struct LetStatement{T <: Expression} <: Statement
     value::T
 end
 
-statement_node(::LetStatement) = nothing
-token_literal(ls::LetStatement) = ls.token.literal
 function Base.string(ls::LetStatement)
     return ls.token.literal * " " * string(ls.name) * " = " * string(ls.value) * ";"
 end
@@ -180,8 +141,6 @@ struct ReturnStatement{T <: Expression} <: Statement
     return_value::T
 end
 
-statement_node(::ReturnStatement) = nothing
-token_literal(rs::ReturnStatement) = rs.token.literal
 Base.string(rs::ReturnStatement) = token_literal(rs) * " " * string(rs.return_value) * ";"
 
 struct ExpressionStatement{T <: Expression} <: Statement
@@ -189,6 +148,4 @@ struct ExpressionStatement{T <: Expression} <: Statement
     expression::T
 end
 
-statement_node(::ExpressionStatement) = nothing
-token_literal(es::ExpressionStatement) = es.token.literal
 Base.string(es::ExpressionStatement) = string(es.expression)
