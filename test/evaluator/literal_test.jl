@@ -80,3 +80,32 @@ end end
     test_object(evaluated.elements[2], 4)
     test_object(evaluated.elements[3], 6)
 end end
+
+@testset "Test evaluating HashLiteral" begin for (code, expected) in [
+    ("""{"foo": "bar", true: false}""", Dict("foo" => "bar", true => false)),
+    ("{1: 2, 1: 3, 1: 4}", Dict(1 => 4)),
+    ("""{{3: 5}: {"1": 2}}""", Dict(Dict(3 => 5) => Dict("1" => 2))),
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    @test evaluated isa m.HashObj
+    test_object(evaluated, expected)
+end end
+
+@testset "Test evaluating HashLiteral IndexExpression" begin for (code, expected) in [
+    ("""{"foo": 5}["foo"]""", 5),
+    ("""{"foo": 5}["bar"]""", nothing),
+    ("""let key = "foo"; {"foo": 5}[key]""", 5),
+    ("""{}["foo"]""", nothing),
+    ("{5: 5}[5]", 5),
+    ("{true: 5}[true]", 5),
+    ("{false: 5}[false]", 5),
+    ("let a = [1, 2]; {a: 2}[[1, 2]]", 2),
+    ("let a = {1: 2, 3: 4}; {a: 2}[{3: 4, 1: 2}]", 2),
+]
+    evaluated = evaluate_from_code!(code)
+    @test evaluated isa m.Object
+
+    test_object(evaluated, expected)
+end end

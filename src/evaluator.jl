@@ -40,6 +40,22 @@ function evaluate(node::ArrayLiteral, env::Environment)
     return ArrayObj(elements)
 end
 
+function evaluate(node::HashLiteral, env::Environment)
+    pairs = Dict{Object, Object}()
+
+    for (key_node, value_node) in node.pairs
+        key = evaluate(key_node, env)
+        key isa ErrorObj && return key
+
+        value = evaluate(value_node, env)
+        value isa ErrorObj && return value
+
+        pairs[key] = value
+    end
+
+    return HashObj(pairs)
+end
+
 function evaluate(node::CallExpression, env::Environment)
     fn = evaluate(node.fn, env)
     fn isa ErrorObj && return fn
@@ -228,13 +244,17 @@ function evaluate_infix_expression(operator::String, left::StringObj, right::Str
 end
 
 function evaluate_index_expression(left::Object, ::Object)
-    ErrorObj("index operator not supported: " * type(left))
+    return ErrorObj("index operator not supported: " * type(left))
 end
+
 function evaluate_index_expression(::ArrayObj, index::Object)
-    ErrorObj("unsupported index type: " * type(index))
+    return ErrorObj("unsupported index type: " * type(index))
 end
+
 function evaluate_index_expression(left::ArrayObj, index::IntegerObj)
     index = index.value
     max_index = length(left.elements) - 1
     return 0 <= index <= max_index ? left.elements[index + 1] : _NULL
 end
+
+evaluate_index_expression(left::HashObj, key::Object) = Base.get(left.pairs, key, _NULL)

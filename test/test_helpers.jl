@@ -94,6 +94,15 @@ function test_object(object::m.ArrayObj, expected::Vector)
     end
 end
 
+function test_object(object::m.HashObj, expected::Dict)
+    @test length(object.pairs) == length(expected)
+
+    for (k, v) in collect(expected)
+        key = m.Object(k)
+        test_object(get(object.pairs, key, nothing), v)
+    end
+end
+
 function evaluate_from_code!(code::String)
     _, _, program = parse_from_code!(code)
     env = m.Environment()
