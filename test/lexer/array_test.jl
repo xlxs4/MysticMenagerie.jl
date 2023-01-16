@@ -1,4 +1,4 @@
-@testset "Test basic token set" begin
+@testset "Test array token set" begin
     l = m.Lexer("[1, 2];")
     expected = map(x -> m.Token(x...),
                    [

@@ -16,6 +16,7 @@
     GT
     COMMA
     SEMICOLON
+    COLON
     LPAREN
     RPAREN
     LBRACKET

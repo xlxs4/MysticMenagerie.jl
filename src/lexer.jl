@@ -78,6 +78,8 @@ function next_token!(l::Lexer)
         return read_ident!(l)
     elseif is_valid_digit(ch)
         return read_number!(l)
+    elseif ch == ':'
+        token = Token(COLON, ":")
     else
         token = Token(ILLEGAL, string(ch))
     end

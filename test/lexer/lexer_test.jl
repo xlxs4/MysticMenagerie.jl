@@ -6,3 +6,4 @@
 @time begin @time @testset "Keyword" begin include("keyword_test.jl") end end
 @time begin @time @testset "Operator" begin include("operator_test.jl") end end
 @time begin @time @testset "Array" begin include("array_test.jl") end end
+@time begin @time @testset "Hash" begin include("hash_test.jl") end end
