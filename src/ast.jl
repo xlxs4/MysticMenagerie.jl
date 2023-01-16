@@ -128,6 +128,17 @@ function Base.string(al::ArrayLiteral)
     return "[" * join(map(string, al.elements), ", ") * "]"
 end
 
+struct HashLiteral <: Expression
+    token::Token
+    pairs::Dict{Expression, Expression}
+end
+
+expression_node(::HashLiteral) = nothing
+token_literal(hl::HashLiteral) = hl.token.literal
+function Base.string(hl::HashLiteral)
+    "{" * join(map(x -> string(x[1]) * ":" * string(x[2]), collect(hl.pairs)), ", ") * "}"
+end
+
 struct CallExpression{T <: Expression} <: Expression
     token::Token
     fn::T

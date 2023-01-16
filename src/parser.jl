@@ -241,6 +241,28 @@ function parse_array_literal!(p::Parser)
     return ArrayLiteral(token, elements)
 end
 
+function parse_hash_literal!(p::Parser)
+    token = p.current_token
+    pairs = Dict{Expression, Expression}()
+
+    while p.peek_token.type != RBRACE
+        next_token!(p)
+        key = parse_expression!(p, LOWEST)
+        !expect_peek!(p, COLON) && return nothing
+
+        next_token!(p)
+        value = parse_expression!(p, LOWEST)
+        pairs[key] = value
+
+        if p.peek_token.type != RBRACE && !expect_peek!(p, COMMA)
+            return nothing
+        end
+    end
+    next_token!(p)
+
+    return HashLiteral(token, pairs)
+end
+
 function parse_call_expression!(p::Parser, fn::Expression)
     token = p.current_token
     arguments = parse_expression_list!(p, RPAREN)
@@ -300,7 +322,8 @@ const PREFIX_FUNCTIONS = Dict{TokenType, Function}(IDENT => parse_identifier,
                                                    LPAREN => parse_grouped_expression!,
                                                    IF => parse_if_expression!,
                                                    FUNCTION => parse_function_literal!,
-                                                   LBRACKET => parse_array_literal!)
+                                                   LBRACKET => parse_array_literal!,
+                                                   LBRACE => parse_hash_literal!)
 
 const INFIX_FUNCTIONS = Dict{TokenType, Function}(PLUS => parse_infix_expression!,
                                                   MINUS => parse_infix_expression!,

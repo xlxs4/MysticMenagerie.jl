@@ -103,3 +103,118 @@ end end
     test_infix_expression(al.elements[2], 2, "*", 2)
     test_infix_expression(al.elements[3], 3, "+", 3)
 end end
+
+@testset "Test parsing HashLiteral - StringLiteral keys" begin for (code, expected) in [
+    ("{\"one\": 1, \"two\": 2, \"three\": 3}",
+     Dict("one" => 1, "two" => 2, "three" => 3))
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    hl = stmt.expression
+    @test hl isa m.HashLiteral
+
+    @test length(hl.pairs) == 3
+
+    for (key, value) in hl.pairs
+        @test key isa m.StringLiteral
+        @test key.value in keys(expected)
+        test_integer_literal(value, expected[key.value])
+    end
+end end
+
+@testset "Test parsing HashLiteral - StringLiteral keys, Expression values" begin for (code, tests) in [
+    ("""{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}""",
+     Dict("one" => x -> test_infix_expression(x, 0, "+", 1),
+          "two" => x -> test_infix_expression(x, 10, "-", 8),
+          "three" => x -> test_infix_expression(x, 15, "/", 5)))
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    hl = stmt.expression
+    @test hl isa m.HashLiteral
+
+    @test length(hl.pairs) == 3
+
+    for (key, value) in hl.pairs
+        @test key isa m.StringLiteral
+        @test key.value in keys(tests)
+        tests[key.value](value)
+    end
+end end
+
+@testset "Test parsing HashLiteral - IntegerLiteral keys" begin for (code, expected) in [
+    ("{1: 1, 2: 2, 3: 3}",
+     Dict(1 => 1, 2 => 2, 3 => 3))
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    hl = stmt.expression
+    @test hl isa m.HashLiteral
+
+    @test length(hl.pairs) == 3
+
+    for (key, value) in hl.pairs
+        @test key isa m.IntegerLiteral
+        @test key.value in keys(expected)
+        test_integer_literal(value, expected[key.value])
+    end
+end end
+
+@testset "Test parsing HashLiteral - BooleanLiteral keys" begin for (code, expected) in [
+    ("{false: 0, true: 1}",
+     Dict(false => 0, true => 1))
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    hl = stmt.expression
+    @test hl isa m.HashLiteral
+
+    @test length(hl.pairs) == 2
+
+    for (key, value) in hl.pairs
+        @test key isa m.BooleanLiteral
+        @test key.value in keys(expected)
+        test_integer_literal(value, expected[key.value])
+    end
+end end
+
+@testset "Test parsing empty HashLiteral" begin for (code) in [
+    ("{}")
+]
+    _, p, program = parse_from_code!(code)
+    test_parser_errors(p)
+
+    @test length(program.statements) == 1
+
+    stmt = program.statements[1]
+    @test stmt isa m.ExpressionStatement
+
+    hl = stmt.expression
+    @test hl isa m.HashLiteral
+
+    @test length(hl.pairs) == 0
+end end
