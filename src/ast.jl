@@ -67,7 +67,7 @@ struct StringLiteral <: Expression
     value::String
 end
 
-Base.string(s::StringLiteral) = "\"" * string(s.value) * "\""
+Base.string(sl::StringLiteral) = "\"" * string(sl.value) * "\""
 
 struct FunctionLiteral <: Expression
     token::Token

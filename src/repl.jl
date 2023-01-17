@@ -38,6 +38,8 @@ function start_repl()
         end
 
         evaluated = evaluate(program, env)
-        !isnothing(evaluated) && println(evaluated)
+        if !isnothing(evaluated)
+            println(evaluated)
+        end
     end
 end

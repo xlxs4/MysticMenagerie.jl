@@ -70,7 +70,9 @@ function parse_let_statement!(p::Parser)
 
     next_token!(p)
     value = parse_expression!(p, LOWEST)
-    p.peek_token.type == SEMICOLON && next_token!(p)
+    if p.peek_token.type == SEMICOLON
+        next_token!(p)
+    end
     return LetStatement(token, name, value)
 end
 
@@ -110,7 +112,9 @@ function parse_expression_statement!(p::Parser)
     expression = parse_expression!(p, LOWEST)
     isnothing(expression) && return nothing
 
-    p.peek_token.type == SEMICOLON && next_token!(p)
+    if p.peek_token.type == SEMICOLON
+        next_token!(p)
+    end
     return ExpressionStatement(token, expression)
 end
 
@@ -130,7 +134,9 @@ function parse_block_statement!(p::Parser)
     next_token!(p)
     while p.current_token.type != RBRACE && p.current_token.type != EOF
         stmt = parse_statement!(p)
-        !isnothing(stmt) && push!(stmts, stmt)
+        if !isnothing(stmt)
+            push!(stmts, stmt)
+        end
 
         next_token!(p)
     end
@@ -305,7 +311,9 @@ function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
         stmt = parse_statement!(p)
-        !isnothing(stmt) && push!(program.stmts, stmt)
+        if !isnothing(stmt)
+            push!(program.stmts, stmt)
+        end
         next_token!(p)
     end
 
