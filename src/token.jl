@@ -32,11 +32,6 @@
     RETURN
 end
 
-struct Token
-    type::TokenType
-    literal::String
-end
-
 const KEYWORDS = Base.ImmutableDict("fn" => FUNCTION,
                                     "let" => LET,
                                     "true" => TRUE,
@@ -44,5 +39,10 @@ const KEYWORDS = Base.ImmutableDict("fn" => FUNCTION,
                                     "if" => IF,
                                     "else" => ELSE,
                                     "return" => RETURN)
+
+struct Token
+    type::TokenType
+    literal::String
+end
 
 lookup_ident(ident::AbstractString) = ident ∈ keys(KEYWORDS) ? KEYWORDS[ident] : IDENT

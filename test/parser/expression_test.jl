@@ -4,12 +4,12 @@
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    ident = stmt.expression
+    ident = stmt.expr
     test_literal_expression(ident, value)
 end end
 
@@ -20,12 +20,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    boolean = stmt.expression
+    boolean = stmt.expr
     test_literal_expression(boolean, value)
 end end
 
@@ -47,12 +47,12 @@ for (code, operator, right_value) in [
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.PrefixExpression
     @test expr.operator == operator
 
@@ -75,12 +75,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     test_infix_expression(expr, left, operator, right)
 end end
 
@@ -88,22 +88,22 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.IfExpression
 
     test_infix_expression(expr.condition, "x", "<", "y")
 
-    @test length(expr.consequence.statements) == 1
+    @test length(expr.consequence.stmts) == 1
 
-    consequence = expr.consequence.statements[1]
+    consequence = expr.consequence.stmts[1]
     @test consequence isa m.ExpressionStatement
 
-    test_identifier(consequence.expression, "x")
+    test_identifier(consequence.expr, "x")
 
     @test isnothing(expr.alternative)
 end end
@@ -112,29 +112,29 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.IfExpression
 
     test_infix_expression(expr.condition, "x", "<", "y")
 
-    @test length(expr.consequence.statements) == 1
+    @test length(expr.consequence.stmts) == 1
 
-    consequence = expr.consequence.statements[1]
+    consequence = expr.consequence.stmts[1]
     @test consequence isa m.ExpressionStatement
 
-    test_identifier(consequence.expression, "x")
+    test_identifier(consequence.expr, "x")
 
-    @test length(expr.alternative.statements) == 1
+    @test length(expr.alternative.stmts) == 1
 
-    alternative = expr.alternative.statements[1]
+    alternative = expr.alternative.stmts[1]
     @test alternative isa m.ExpressionStatement
 
-    test_identifier(alternative.expression, "y")
+    test_identifier(alternative.expr, "y")
 end end
 
 @testset "Test parsing empty CallExpression" begin for (code, expected_ident) in [
@@ -143,16 +143,16 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.CallExpression
 
     test_identifier(expr.fn, expected_ident)
-    @test isempty(expr.arguments)
+    @test isempty(expr.args)
 end end
 
 @testset "Test parsing CallExpression with arguments" begin for (code, expected_ident, left, operator, right) in [
@@ -165,22 +165,22 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.CallExpression
 
     test_identifier(expr.fn, expected_ident)
 
-    @test length(expr.arguments) == 3
+    @test length(expr.args) == 3
 
-    test_literal_expression(expr.arguments[1], 1)
+    test_literal_expression(expr.args[1], 1)
 
-    test_infix_expression(expr.arguments[2], left[1], operator[1], right[1])
-    test_infix_expression(expr.arguments[3], left[2], operator[2], right[2])
+    test_infix_expression(expr.args[2], left[1], operator[1], right[1])
+    test_infix_expression(expr.args[3], left[2], operator[2], right[2])
 end end
 
 @testset "Test parsing IndexExpression" begin for (code, left, operator, right) in [
@@ -189,12 +189,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.IndexExpression
 
     test_identifier(expr.left, "myArray")

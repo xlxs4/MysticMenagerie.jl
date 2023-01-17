@@ -126,15 +126,15 @@ end
 
 function parse_block_statement!(p::Parser)
     token = p.current_token
-    statements = Statement[]
+    stmts = Statement[]
     next_token!(p)
     while p.current_token.type != RBRACE && p.current_token.type != EOF
         stmt = parse_statement!(p)
-        !isnothing(stmt) && push!(statements, stmt)
+        !isnothing(stmt) && push!(stmts, stmt)
 
         next_token!(p)
     end
-    return BlockStatement(token, statements)
+    return BlockStatement(token, stmts)
 end
 
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
@@ -228,11 +228,11 @@ function parse_function_literal!(p::Parser)
     token = p.current_token
     !expect_peek!(p, LPAREN) && return nothing
 
-    parameters = parse_function_parameters!(p)
+    params = parse_function_parameters!(p)
     !expect_peek!(p, LBRACE) && return nothing
 
     body = parse_block_statement!(p)
-    return FunctionLiteral(token, parameters, body)
+    return FunctionLiteral(token, params, body)
 end
 
 function parse_array_literal!(p::Parser)
@@ -265,8 +265,8 @@ end
 
 function parse_call_expression!(p::Parser, fn::Expression)
     token = p.current_token
-    arguments = parse_expression_list!(p, RPAREN)
-    return CallExpression(token, fn, arguments)
+    args = parse_expression_list!(p, RPAREN)
+    return CallExpression(token, fn, args)
 end
 
 function parse_index_expression!(p::Parser, left::Expression)
@@ -305,7 +305,7 @@ function parse_program!(p::Parser)
     program = Program(Statement[])
     while p.current_token.type != EOF
         stmt = parse_statement!(p)
-        !isnothing(stmt) && push!(program.statements, stmt)
+        !isnothing(stmt) && push!(program.stmts, stmt)
         next_token!(p)
     end
 

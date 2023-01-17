@@ -81,8 +81,8 @@ test_object(object::m.StringObj, expected::String) = @test object.value == expec
 
 function test_object(object::m.FunctionObj, expected_parameter::String,
                      expected_body::String)
-    @test length(object.parameters) == 1
-    @test string(object.parameters[1]) == expected_parameter
+    @test length(object.params) == 1
+    @test string(object.params[1]) == expected_parameter
     @test string(object.body) == expected_body
 end
 

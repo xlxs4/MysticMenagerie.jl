@@ -13,12 +13,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    il = stmt.expression
+    il = stmt.expr
     test_literal_expression(il, value)
 end end
 
@@ -28,12 +28,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    expr = stmt.expression
+    expr = stmt.expr
     @test expr isa m.StringLiteral
     @test expr.value == value
 end end
@@ -42,24 +42,24 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    fn = stmt.expression
+    fn = stmt.expr
     @test fn isa m.FunctionLiteral
-    @test length(fn.parameters) == 2
+    @test length(fn.params) == 2
 
-    test_literal_expression(fn.parameters[1], "x")
-    test_literal_expression(fn.parameters[2], "y")
+    test_literal_expression(fn.params[1], "x")
+    test_literal_expression(fn.params[2], "y")
 
-    @test length(fn.body.statements) == 1
+    @test length(fn.body.stmts) == 1
 
-    body_stmt = fn.body.statements[1]
+    body_stmt = fn.body.stmts[1]
     @test body_stmt isa m.ExpressionStatement
 
-    test_infix_expression(body_stmt.expression, "x", "+", "y")
+    test_infix_expression(body_stmt.expr, "x", "+", "y")
 end end
 
 @testset "Test parsing FunctionLiteral parameters" begin for (code, expected) in [
@@ -70,15 +70,15 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    fn = stmt.expression
-    @test length(fn.parameters) == length(expected)
+    fn = stmt.expr
+    @test length(fn.params) == length(expected)
 
-    for (parameter, expected_parameter) in zip(fn.parameters, expected)
+    for (parameter, expected_parameter) in zip(fn.params, expected)
         test_literal_expression(parameter, expected_parameter)
     end
 end end
@@ -89,12 +89,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    al = stmt.expression
+    al = stmt.expr
     @test al isa m.ArrayLiteral
 
     @test length(al.elements) == 3
@@ -111,12 +111,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    hl = stmt.expression
+    hl = stmt.expr
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 3
@@ -137,12 +137,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    hl = stmt.expression
+    hl = stmt.expr
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 3
@@ -161,12 +161,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    hl = stmt.expression
+    hl = stmt.expr
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 3
@@ -185,12 +185,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    hl = stmt.expression
+    hl = stmt.expr
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 2
@@ -208,12 +208,12 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ExpressionStatement
 
-    hl = stmt.expression
+    hl = stmt.expr
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 0

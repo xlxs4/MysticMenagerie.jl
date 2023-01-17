@@ -95,7 +95,7 @@ set!(env::Environment, name::String, value::Object) = push!(env.store, name => v
 set!(env::Environment, name::String, ::Nothing) = push!(env.store, name => _NULL)
 
 struct FunctionObj <: Object
-    parameters::Vector{Identifier}
+    params::Vector{Identifier}
     body::BlockStatement
     env::Environment
 end
@@ -103,7 +103,7 @@ end
 type(::FunctionObj) = FUNCTION_OBJ
 
 function Base.string(f::FunctionObj)
-    return "fn(" * join(map(string, f.parameters), ", ") * ") {\n" * string(f.body) * "\n}"
+    return "fn(" * join(map(string, f.params), ", ") * ") {\n" * string(f.body) * "\n}"
 end
 
 struct BuiltinObj <: Object

@@ -14,9 +14,9 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.Statement
     test_let_statement(stmt, expected_ident)
 
@@ -32,9 +32,9 @@ end end
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
-    @test length(program.statements) == 1
+    @test length(program.stmts) == 1
 
-    stmt = program.statements[1]
+    stmt = program.stmts[1]
     @test stmt isa m.ReturnStatement
 
     val = stmt.return_value
