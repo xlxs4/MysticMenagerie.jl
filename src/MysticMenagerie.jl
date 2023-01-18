@@ -1,5 +1,6 @@
 module MysticMenagerie
 
+include("errors.jl")
 include("methods.jl")
 include("types.jl")
 include("token.jl")

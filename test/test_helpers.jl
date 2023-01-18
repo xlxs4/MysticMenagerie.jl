@@ -7,6 +7,7 @@ function check_parser_errors(p::m.Parser)
         return join(vcat(["parser has $(length(p.errors)) errors"],
                          ["parser error: $e" for e in p.errors]), "\n")
     end
+
     return nothing
 end
 
@@ -82,10 +83,12 @@ function test_object(object::m.AbstractObject, expected::Bool)
     @test object.value == expected
 end
 
-test_object(object::m.AbstractObject, expected::String) = @test object.message == expected
+function test_object(object::m.ErrorObj, expected::Exception)
+    @test object == m.ErrorObj(expected)
+end
+
 test_object(::m.NullObj, expected::String) = @test expected == ""
 test_object(object::m.StringObj, expected::String) = @test object.value == expected
-
 function test_object(object::m.FunctionObj, expected_parameter::String,
                      expected_body::String)
     @test length(object.params) == 1

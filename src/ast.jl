@@ -130,8 +130,11 @@ end
 
 function Base.string(ie::IfExpression)
     left = "if (" * string(ie.condition) * ") { " * string(ie.consequence) * " } "
-    return isnothing(ie.alternative) ? left :
-           (left * "else { " * string(ie.alternative) * " }")
+    if isnothing(ie.alternative)
+        return left
+    else
+        return left * "else { " * string(ie.alternative) * " }"
+    end
 end
 
 struct CallExpression{E <: AbstractExpression} <: AbstractExpression

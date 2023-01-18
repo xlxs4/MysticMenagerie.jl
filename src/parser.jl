@@ -153,8 +153,7 @@ function parse_integer_literal!(p::Parser)
         value = parse(Int, p.current_token.literal)
         return IntegerLiteral(p.current_token, value)
     catch
-        msg = "could not parse $(p.current_token.literal) as integer"
-        push!(p.errors, msg)
+        push!(p.errors, "could not parse $(p.current_token.literal) as integer")
         return nothing
     end
 end

@@ -11,8 +11,8 @@ for (code, expected) in [
     ("rest(\"hello\")", "ello"),
     ("rest(\"\")", ""),
     ("rest(\"\")", nothing),
-    ("rest(1)", "argumentument to `rest` not supported, got INTEGER"),
-    ("rest([1, 2], [3, 4])", "wrong number of arguments. got 2, want 1"),
+    ("rest(1)", ArgumentError("argument to `rest` not supported, got INTEGER")),
+    ("rest([1, 2], [3, 4])", ArgumentError("wrong number of arguments. got 2, want 1")),
 ]
     evaluated = evaluate_from_code!(code)
     @test evaluated isa m.AbstractObject

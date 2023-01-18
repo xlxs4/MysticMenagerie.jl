@@ -57,12 +57,17 @@ end
 type(::ReturnValue) = RETURN_VALUE
 Base.string(rv::ReturnValue) = string(rv.value)
 
-struct ErrorObj <: AbstractObject
-    message::String
+struct ErrorObj{E <: Exception} <: AbstractObject
+    exception::E
 end
 
 type(::ErrorObj) = ERROR_OBJ
-Base.string(e::ErrorObj) = "ERROR: " * e.message
+Base.string(e::ErrorObj) = "ERROR: " * e.exception.msg
+function Base.:(==)(a::ErrorObj, b::ErrorObj)
+    return typeof(a.exception) == typeof(b.exception) && a.exception.msg == b.exception.msg
+end
+
+Base.hash(e::ErrorObj, h::UInt) = hash(e.exception, hash(e.exception.msg, h))
 
 struct Environment{O <: AbstractObject}
     store::Dict{String, O}

@@ -19,6 +19,7 @@ function evaluate(node::Vector{AbstractExpression}, env::Environment)
         evaluated isa ErrorObj && return [evaluated]
         push!(result, evaluated)
     end
+
     return result
 end
 
@@ -29,13 +30,17 @@ function evaluate(statements::Vector{AbstractStatement}, env::Environment)
         result isa ReturnValue && return result.value
         result isa ErrorObj && return result
     end
+
     return result
 end
 
 function evaluate(node::PrefixExpression, env::Environment)
     right = evaluate(node.right, env)
-    return right isa ErrorObj ? right :
-           evaluate_prefix_expression(node.operator, right)
+    if right isa ErrorObj
+        return right
+    else
+        return evaluate_prefix_expression(node.operator, right)
+    end
 end
 
 function evaluate_prefix_expression(operator::String, right::AbstractObject)
@@ -44,7 +49,7 @@ function evaluate_prefix_expression(operator::String, right::AbstractObject)
     elseif operator == "-"
         return evaluate_minus_operator_expression(right)
     else
-        return ErrorObj("unknown operator: " * operator * type(right))
+        return ErrorObj(UnknownOperator(operator * type(right)))
     end
 end
 
@@ -58,7 +63,7 @@ end
 
 evaluate_minus_operator_expression(right::IntegerObj) = IntegerObj(-right.value)
 function evaluate_minus_operator_expression(right::AbstractObject)
-    return ErrorObj("unknown operator: -" * type(right))
+    return ErrorObj(UnknownOperator("-" * type(right)))
 end
 
 function evaluate(node::InfixExpression, env::Environment)
@@ -74,15 +79,18 @@ end
 function evaluate_infix_expression(operator::String, left::AbstractObject,
                                    right::AbstractObject)
     if type(left) != type(right)
-        return ErrorObj("type mismatch: " * type(left) * " " * operator * " " * type(right))
+        return ErrorObj(TypeMismatch(type(left) * " " * operator *
+                                     " " * type(right)))
     end
+
     if operator == "=="
         return left == right ? _TRUE : _FALSE
     elseif operator == "!="
         return left != right ? _TRUE : _FALSE
     else
-        return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
-                        type(right))
+        return ErrorObj(UnknownOperator(type(left) * " " * operator *
+                                        " " *
+                                        type(right)))
     end
 end
 
@@ -95,7 +103,7 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
     elseif operator == "*"
         return IntegerObj(left.value * right.value)
     elseif operator == "/"
-        right.value == 0 && return ErrorObj("division by zero")
+        right.value == 0 && return ErrorObj(DivideError())
         return IntegerObj(left.value ÷ right.value)
     elseif operator == "<"
         return left.value < right.value ? _TRUE : _FALSE
@@ -106,16 +114,17 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
     elseif operator == "!="
         return left.value != right.value ? _TRUE : _FALSE
     else
-        return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
-                        type(right))
+        return ErrorObj(UnknownOperator(type(left) * " " * operator *
+                                        " " *
+                                        type(right)))
     end
 end
 
 function evaluate_infix_expression(operator::String, left::StringObj,
                                    right::StringObj)
     if operator != "+"
-        return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
-                        type(right))
+        return ErrorObj(UnknownOperator(type(left) * " " * operator *
+                                        " " * type(right)))
     else
         return StringObj(left.value * right.value)
     end
@@ -147,12 +156,12 @@ function evaluate(node::CallExpression, env::Environment)
 end
 
 function apply_function(fn::AbstractObject, ::Vector{AbstractObject})
-    ErrorObj("not a function: " * type(fn))
+    return ErrorObj(ArgumentError("not a function: " * type(fn)))
 end
 
 function apply_function(fn::FunctionObj, arguments::Vector{AbstractObject})
     if length(fn.params) != length(arguments)
-        return ErrorObj("argumentument error: wrong number of arguments: got $(length(arguments))")
+        return ErrorObj(ArgumentError("wrong number of arguments: got $(length(arguments)), want $(length(fn.params))"))
     end
 
     extended_env = extend_function_environment(fn, arguments)
@@ -167,8 +176,8 @@ end
 function extend_function_environment(fn::FunctionObj,
                                      arguments::Vector{AbstractObject})
     env = Environment(fn.env)
-    for (parameter, argumentument) in zip(fn.params, arguments)
-        set!(env, parameter.value, argumentument)
+    for (parameter, argument) in zip(fn.params, arguments)
+        set!(env, parameter.value, argument)
     end
 
     return env
@@ -193,11 +202,11 @@ function evaluate_index_expression(left::HashObj, key::AbstractObject)
 end
 
 function evaluate_index_expression(left::AbstractObject, ::AbstractObject)
-    return ErrorObj("index operator not supported: " * type(left))
+    return ErrorObj(TypeMismatch(type(left)))
 end
 
 function evaluate_index_expression(::ArrayObj, index::AbstractObject)
-    return ErrorObj("unsupported index type: " * type(index))
+    return ErrorObj(TypeMismatch(type(index)))
 end
 
 function evaluate_index_expression(left::ArrayObj, index::IntegerObj)
@@ -237,7 +246,8 @@ function evaluate(node::Identifier, env::Environment)
     val = get(env, node.value)
     !isnothing(val) && return val
 
-    node.value ∉ keys(BUILTINS) && return ErrorObj("identifier not found: $(node.value)")
+    node.value ∉ keys(BUILTINS) &&
+        return ErrorObj(UnknownIdentifier(node.value))
 
     return BUILTINS[node.value]
 end
