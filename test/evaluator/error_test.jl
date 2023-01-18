@@ -70,7 +70,7 @@ end end
     ("if (true) { 5 / 0; 2 + 3; 4; }", m.DivisionByZero("")),
 ]
     evaluated = evaluate_from_code!(code)
-    test_object(expected, evaluated)
+    test_object(evaluated, expected)
 end end
 
 @testset "Test ArgumentError" begin for (code, expected) in [
