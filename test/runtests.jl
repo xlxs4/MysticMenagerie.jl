@@ -27,6 +27,7 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "Expression" begin include("evaluator/expression_test.jl") end
         @time @safetestset "Literal" begin include("evaluator/literal_test.jl") end
         @time @safetestset "Statement" begin include("evaluator/statement_test.jl") end
+        @time @safetestset "Type" begin include("evaluator/type_test.jl") end
     end
 
     if GROUP == "All" || GROUP == "Lexer"

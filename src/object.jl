@@ -125,7 +125,8 @@ end
 
 type(::HashObj) = "HASH"
 function Base.string(h::HashObj)
-    return "{" * join(map(x -> string(x[1]) * ":" * string(x[2]), collect(h.pairs)), ", ") *
+    return "{" *
+           join(map(x -> string(x[1]) * ": " * string(x[2]), collect(h.pairs)), ", ") *
            "}"
 end
 

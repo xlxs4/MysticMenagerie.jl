@@ -54,6 +54,10 @@ end
 
 Base.string(bs::BlockStatement) = join(map(string, bs.statements))
 
+struct NullLiteral <: AbstractExpression
+    token::Token
+end
+
 struct IntegerLiteral <: AbstractExpression
     token::Token
     value::Int
@@ -98,7 +102,7 @@ end
 
 function Base.string(hl::HashLiteral)
     return "{" *
-           join(map(x -> string(x[1]) * ":" * string(x[2]), collect(hl.pairs)), ", ") * "}"
+           join(map(x -> string(x[1]) * ": " * string(x[2]), collect(hl.pairs)), ", ") * "}"
 end
 
 struct PrefixExpression{E <: AbstractExpression} <: AbstractExpression

@@ -148,6 +148,7 @@ end
 
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
 parse_boolean(p::Parser) = BooleanLiteral(p.current_token, p.current_token.type == TRUE)
+parse_null(p::Parser) = NullLiteral(p.current_token)
 function parse_integer_literal!(p::Parser)
     try
         value = parse(Int, p.current_token.literal)
@@ -330,6 +331,7 @@ const PREFIX_FUNCTIONS = Dict{TokenType, Function}(IDENT => parse_identifier,
                                                    MINUS => parse_prefix_expression!,
                                                    TRUE => parse_boolean,
                                                    FALSE => parse_boolean,
+                                                   NULL => parse_null,
                                                    LPAREN => parse_grouped_expression!,
                                                    IF => parse_if_expression!,
                                                    FUNCTION => parse_function_literal!,

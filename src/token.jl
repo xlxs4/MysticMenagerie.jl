@@ -27,6 +27,7 @@
     LET
     TRUE
     FALSE
+    NULL
     IF
     ELSE
     RETURN
@@ -36,6 +37,7 @@ const KEYWORDS = Base.ImmutableDict("fn" => FUNCTION,
                                     "let" => LET,
                                     "true" => TRUE,
                                     "false" => FALSE,
+                                    "null" => NULL,
                                     "if" => IF,
                                     "else" => ELSE,
                                     "return" => RETURN)

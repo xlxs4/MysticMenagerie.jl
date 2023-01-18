@@ -4,25 +4,41 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-for (code, expected) in [
+@testset "Test Tokens Program to String" begin
+    program = m.Program([
+                            m.LetStatement(m.Token(m.LET, "let"),
+                                           m.Identifier(m.Token(m.IDENT, "myVar"), "myVar"),
+                                           m.Identifier(m.Token(m.IDENT, "anotherVar"),
+                                                        "anotherVar")),
+                        ])
+
+    @test string(program) == "let myVar = anotherVar;"
+end
+
+@testset "Test Program to String" begin for (code, expected) in [
     ("""
      let a = 1;
      let b = a + 2;
 
      let f = if (true) {
-         fn(x) { x + 1; }
+        fn(x) {
+            x + 1;
+        }
      } else { 
-         fn(x) { return x * 2; }
+        fn(x) {
+            return x * 2;
+        }
      }
 
      let c = f(b); 
 
-     let d = 1 + 2 * 3 / a * (5 - 2 * -3);
+     let d = [a, b, c];
+     let e = {a:b};
      """,
-     "let a = 1;let b = (a + 2);let f = if (true) { fn(x) (x + 1) } else { fn(x) return (x * 2); };let c = f(b);let d = (1 + (((2 * 3) / a) * (5 - (2 * (-3)))));")
+     "let a = 1;let b = (a + 2);let f = if (true) { fn(x) (x + 1) } else { fn(x) return (x * 2); };let c = f(b);let d = [a, b, c];let e = {a: b};")
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
     program = m.parse_program!(p)
     @test string(program) == expected
-end
+end end

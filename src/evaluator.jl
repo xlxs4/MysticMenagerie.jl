@@ -103,7 +103,7 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
     elseif operator == "*"
         return IntegerObj(left.value * right.value)
     elseif operator == "/"
-        right.value == 0 && return ErrorObj(DivideError())
+        right.value == 0 && return ErrorObj(DivisionByZero(""))
         return IntegerObj(left.value ÷ right.value)
     elseif operator == "<"
         return left.value < right.value ? _TRUE : _FALSE
@@ -122,11 +122,15 @@ end
 
 function evaluate_infix_expression(operator::String, left::StringObj,
                                    right::StringObj)
-    if operator != "+"
+    if operator == "+"
+        return StringObj(left.value * right.value)
+    elseif operator == "=="
+        return left.value == right.value ? _TRUE : _FALSE
+    elseif operator == "!="
+        return left.value != right.value ? _TRUE : _FALSE
+    else
         return ErrorObj(UnknownOperator(type(left) * " " * operator *
                                         " " * type(right)))
-    else
-        return StringObj(left.value * right.value)
     end
 end
 
@@ -156,7 +160,7 @@ function evaluate(node::CallExpression, env::Environment)
 end
 
 function apply_function(fn::AbstractObject, ::Vector{AbstractObject})
-    return ErrorObj(ArgumentError("not a function: " * type(fn)))
+    return ErrorObj(TypeMismatch("not a function: " * type(fn)))
 end
 
 function apply_function(fn::FunctionObj, arguments::Vector{AbstractObject})
@@ -282,4 +286,29 @@ function evaluate(node::HashLiteral, env::Environment)
     end
 
     return HashObj(pairs)
+end
+
+AbstractNode(::AbstractObject) = NullLiteral(Token(NULL, "null"))
+function AbstractNode(object::IntegerObj)
+    IntegerLiteral(Token(INT, string(object.value)), object.value)
+end
+
+AbstractNode(object::StringObj) = StringLiteral(Token(STRING, object.value), object.value)
+function AbstractNode(object::BooleanObj)
+    return BooleanLiteral(Token(object.value ? _TRUE : _FALSE, string(object.value)),
+                          object.value)
+end
+
+function AbstractNode(object::HashObj)
+    return HashLiteral(Token(LBRACE, "{"),
+                       Dict(AbstractNode(key) => AbstractNode(value)
+                            for (key, value) in collect(object.pairs)))
+end
+
+function AbstractNode(object::ArrayObj)
+    ArrayLiteral(Token(LBRACKET, "["), map(AbstractNode, object.elements))
+end
+
+function Node(object::FunctionObj)
+    FunctionLiteral(Token(FUNCTION, "fn"), object.parameters, object.body)
 end

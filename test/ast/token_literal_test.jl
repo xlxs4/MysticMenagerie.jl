@@ -4,7 +4,7 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-for (program, expected) in [
+@testset "Test Token Literal" begin for (program, expected) in [
     (m.Program([]), ""),
     (m.Program([
                    m.LetStatement(m.Token(m.LET, "let"),
@@ -14,4 +14,4 @@ for (program, expected) in [
                ]), "let"),
 ]
     @test m.token_literal(program) == expected
-end
+end end

@@ -11,6 +11,8 @@ const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (arguments::Abs
                                                             elseif argument isa
                                                                    ArrayObj
                                                                 return IntegerObj(length(argument.elements))
+                                                            elseif argument isa HashObj
+                                                                return IntegerObj(length(argument.pairs))
                                                             else
                                                                 return ErrorObj(ArgumentError("argument to `len` not supported, got $(type(argument))"))
                                                             end
@@ -88,19 +90,31 @@ const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (arguments::Abs
                                                              end
                                                          end),
                                     "push" => BuiltinObj(function (arguments::AbstractObject...)
-                                                             if length(arguments) != 2
-                                                                 return ErrorObj(ArgumentError("wrong number of arguments. got $(length(arguments)), want 2"))
+                                                             if length(arguments) != 2 &&
+                                                                length(arguments) != 3
+                                                                 return ErrorObj(ArgumentError("wrong number of arguments. got $(length(arguments)), want 2 or 3"))
                                                              end
+                                                             if length(arguments) == 2
+                                                                 array = arguments[1]
+                                                                 if array isa ArrayObj
+                                                                     elements = copy(array.elements)
+                                                                     push!(elements,
+                                                                           arguments[2])
 
-                                                             array = arguments[1]
-                                                             if array isa ArrayObj
-                                                                 elements = copy(array.elements)
-                                                                 push!(elements,
-                                                                       arguments[2])
-
-                                                                 return ArrayObj(elements)
+                                                                     return ArrayObj(elements)
+                                                                 else
+                                                                     return ErrorObj(ArgumentError("argument to `push` must be ARRAY, got $(type(array))"))
+                                                                 end
                                                              else
-                                                                 return ErrorObj(ArgumentError("argument to `push` must be ARRAY, got $(type(array))"))
+                                                                 hash = arguments[1]
+                                                                 if hash isa HashObj
+                                                                     pairs = copy(hash.pairs)
+                                                                     push!(pairs,
+                                                                           arguments[2] => arguments[3])
+                                                                     return HashObj(pairs)
+                                                                 else
+                                                                     return ErrorObj(ArgumentError("argument to `push` must be HASH, got $(type(hash))"))
+                                                                 end
                                                              end
                                                          end),
                                     "puts" => BuiltinObj(function (arguments::AbstractObject...)
@@ -111,4 +125,11 @@ const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (arguments::Abs
                                                                      println(argument)
                                                                  end
                                                              end
+                                                         end),
+                                    "type" => BuiltinObj(function (arguments::AbstractObject...)
+                                                             if length(arguments) != 1
+                                                                 return ErrorObj(ArgumentError("wrong number of arguments. got $(length(arguments)), want 1"))
+                                                             end
+
+                                                             return StringObj(type(arguments[1]))
                                                          end))

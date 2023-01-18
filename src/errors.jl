@@ -1,3 +1,9 @@
+mutable struct DivisionByZero <: Exception
+    msg::String
+end
+
+Base.showerror(io::IO, e::DivisionByZero) = print(io, "division by zero: " * e.msg)
+
 mutable struct TypeMismatch <: Exception
     msg::String
 end

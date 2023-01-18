@@ -34,6 +34,8 @@ function test_boolean_literal(b::m.BooleanLiteral, value::Bool)
     @test m.token_literal(b) == string(value)
 end
 
+test_null_literal(nl::m.NullLiteral) = @test nl isa m.NullLiteral
+
 function test_literal_expression(::m.AbstractExpression, expected)
     error("Unexpected type for $expected.")
 end
