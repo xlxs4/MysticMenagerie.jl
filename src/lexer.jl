@@ -4,7 +4,6 @@ mutable struct Lexer
 end
 
 Lexer(input::String) = Lexer(input, iterate(input))
-
 function read_char(l::Lexer)
     isnothing(l.next) && return
     ch, _ = l.next
@@ -100,6 +99,7 @@ function read_literal!(l::Lexer, f::Function)
     while f(read_char(l))
         push!(chars, read_char!(l))
     end
+
     return join(chars, "")
 end
 
@@ -121,6 +121,7 @@ function read_string!(l::Lexer)
         push!(chars, read_char(l))
         read_char!(l)
     end
+
     read_char!(l)
     return Token(STRING, join(chars, ""))
 end

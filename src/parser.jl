@@ -1,4 +1,4 @@
-@enum ExpressionOrder begin
+@enum AbstractExpressionOrder begin
     LOWEST
     EQUALS
     LESSGREATER
@@ -31,7 +31,6 @@ end
 
 register_prefix!(p::Parser, t::TokenType, fn::Function) = p.prefix_parse_functions[t] = fn
 register_infix!(p::Parser, t::TokenType, fn::Function) = p.infix_parse_functions[t] = fn
-
 function next_token!(p::Parser)
     p.current_token = p.peek_token
     p.peek_token = next_token!(p.lexer)
@@ -73,6 +72,7 @@ function parse_let_statement!(p::Parser)
     if p.peek_token.type == SEMICOLON
         next_token!(p)
     end
+
     return LetStatement(token, name, value)
 end
 
@@ -87,7 +87,7 @@ function parse_return_statement!(p::Parser)
     return ReturnStatement(token, value)
 end
 
-function parse_expression!(p::Parser, precedence::ExpressionOrder)
+function parse_expression!(p::Parser, precedence::AbstractExpressionOrder)
     if p.current_token.type ∉ keys(p.prefix_parse_functions)
         push!(p.errors, "no prefix parse function for $(p.current_token.type) found")
         return nothing
@@ -96,7 +96,8 @@ function parse_expression!(p::Parser, precedence::ExpressionOrder)
         left_expression = prefix_function(p)
 
         while p.peek_token.type != SEMICOLON && precedence < peek_precedence(p)
-            p.peek_token.type ∉ keys(p.infix_parse_functions) && return left_expression
+            p.peek_token.type ∉ keys(p.infix_parse_functions) &&
+                return left_expression
 
             infix_function = p.infix_parse_functions[p.peek_token.type]
             next_token!(p)
@@ -115,6 +116,7 @@ function parse_expression_statement!(p::Parser)
     if p.peek_token.type == SEMICOLON
         next_token!(p)
     end
+
     return ExpressionStatement(token, expression)
 end
 
@@ -130,25 +132,25 @@ end
 
 function parse_block_statement!(p::Parser)
     token = p.current_token
-    stmts = Statement[]
+    statements = AbstractStatement[]
     next_token!(p)
     while p.current_token.type != RBRACE && p.current_token.type != EOF
-        stmt = parse_statement!(p)
-        if !isnothing(stmt)
-            push!(stmts, stmt)
+        statement = parse_statement!(p)
+        if !isnothing(statement)
+            push!(statements, statement)
         end
 
         next_token!(p)
     end
-    return BlockStatement(token, stmts)
+
+    return BlockStatement(token, statements)
 end
 
 parse_identifier(p::Parser) = Identifier(p.current_token, p.current_token.literal)
 parse_boolean(p::Parser) = BooleanLiteral(p.current_token, p.current_token.type == TRUE)
-
 function parse_integer_literal!(p::Parser)
     try
-        value = parse(Int64, p.current_token.literal)
+        value = parse(Int, p.current_token.literal)
         return IntegerLiteral(p.current_token, value)
     catch
         msg = "could not parse $(p.current_token.literal) as integer"
@@ -158,7 +160,6 @@ function parse_integer_literal!(p::Parser)
 end
 
 parse_string_literal(p::Parser) = StringLiteral(p.current_token, p.current_token.literal)
-
 function parse_prefix_expression!(p::Parser)
     token = p.current_token
     operator = p.current_token.literal
@@ -167,7 +168,7 @@ function parse_prefix_expression!(p::Parser)
     return PrefixExpression(token, operator, right)
 end
 
-function parse_infix_expression!(p::Parser, left::Expression)
+function parse_infix_expression!(p::Parser, left::AbstractExpression)
     token = p.current_token
     operator = p.current_token.literal
 
@@ -180,9 +181,9 @@ end
 
 function parse_grouped_expression!(p::Parser)
     next_token!(p)
-    expr = parse_expression!(p, LOWEST)
+    expression = parse_expression!(p, LOWEST)
     !expect_peek!(p, RPAREN) && return nothing
-    return expr
+    return expression
 end
 
 function parse_if_expression!(p::Parser)
@@ -204,6 +205,7 @@ function parse_if_expression!(p::Parser)
     else
         alternative = nothing
     end
+
     return IfExpression(token, condition, consequence, alternative)
 end
 
@@ -249,7 +251,7 @@ end
 
 function parse_hash_literal!(p::Parser)
     token = p.current_token
-    pairs = Dict{Expression, Expression}()
+    pairs = Dict{AbstractExpression, AbstractExpression}()
 
     while p.peek_token.type != RBRACE
         next_token!(p)
@@ -264,18 +266,19 @@ function parse_hash_literal!(p::Parser)
             return nothing
         end
     end
+
     next_token!(p)
 
     return HashLiteral(token, pairs)
 end
 
-function parse_call_expression!(p::Parser, fn::Expression)
+function parse_call_expression!(p::Parser, fn::AbstractExpression)
     token = p.current_token
-    args = parse_expression_list!(p, RPAREN)
-    return CallExpression(token, fn, args)
+    arguments = parse_expression_list!(p, RPAREN)
+    return CallExpression(token, fn, arguments)
 end
 
-function parse_index_expression!(p::Parser, left::Expression)
+function parse_index_expression!(p::Parser, left::AbstractExpression)
     token = p.current_token
     next_token!(p)
     index = parse_expression!(p, LOWEST)
@@ -286,7 +289,7 @@ function parse_index_expression!(p::Parser, left::Expression)
 end
 
 function parse_expression_list!(p::Parser, end_token::TokenType)
-    expressions = Expression[]
+    expressions = AbstractExpression[]
 
     if p.peek_token.type == end_token
         next_token!(p)
@@ -308,12 +311,13 @@ function parse_expression_list!(p::Parser, end_token::TokenType)
 end
 
 function parse_program!(p::Parser)
-    program = Program(Statement[])
+    program = Program(AbstractStatement[])
     while p.current_token.type != EOF
-        stmt = parse_statement!(p)
-        if !isnothing(stmt)
-            push!(program.stmts, stmt)
+        statement = parse_statement!(p)
+        if !isnothing(statement)
+            push!(program.statements, statement)
         end
+
         next_token!(p)
     end
 

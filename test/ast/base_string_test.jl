@@ -1,4 +1,10 @@
-@testset "Test Base.string(program)" begin for (code, expected) in [
+include("../test_helpers.jl")
+
+using MysticMenagerie
+
+const m = MysticMenagerie
+
+for (code, expected) in [
     ("""
      let a = 1;
      let b = a + 2;
@@ -19,4 +25,4 @@
     p = m.Parser(l)
     program = m.parse_program!(p)
     @test string(program) == expected
-end end
+end

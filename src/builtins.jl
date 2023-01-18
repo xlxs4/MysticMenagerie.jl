@@ -1,113 +1,114 @@
-const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (args::Object...)
-                                                            if length(args) !=
+const BUILTINS = Base.ImmutableDict("len" => BuiltinObj(function (arguments::AbstractObject...)
+                                                            if length(arguments) !=
                                                                1
-                                                                return ErrorObj("wrong number of arguments. got $(length(args)), want 1")
+                                                                return ErrorObj("wrong number of arguments. got $(length(arguments)), want 1")
                                                             end
 
-                                                            arg = args[1]
-                                                            if arg isa
+                                                            argument = arguments[1]
+                                                            if argument isa
                                                                StringObj
-                                                                return IntegerObj(length(arg.value))
-                                                            elseif arg isa
+                                                                return IntegerObj(length(argument.value))
+                                                            elseif argument isa
                                                                    ArrayObj
-                                                                return IntegerObj(length(arg.elements))
+                                                                return IntegerObj(length(argument.elements))
                                                             else
-                                                                return ErrorObj("argument to `len` not supported, got $(type(arg))")
+                                                                return ErrorObj("argumentument to `len` not supported, got $(type(argument))")
                                                             end
                                                         end),
-                                    "first" => BuiltinObj(function (args::Object...)
-                                                              if length(args) !=
+                                    "first" => BuiltinObj(function (arguments::AbstractObject...)
+                                                              if length(arguments) !=
                                                                  1
-                                                                  return ErrorObj("wrong number of arguments. got $(length(args)), want 1")
+                                                                  return ErrorObj("wrong number of arguments. got $(length(arguments)), want 1")
                                                               end
 
-                                                              arg = args[1]
-                                                              if arg isa
+                                                              argument = arguments[1]
+                                                              if argument isa
                                                                  StringObj
-                                                                  return length(arg.value) >
+                                                                  return length(argument.value) >
                                                                          0 ?
-                                                                         StringObj(string(first(arg.value))) :
+                                                                         StringObj(string(first(argument.value))) :
                                                                          _NULL
-                                                              elseif arg isa
+                                                              elseif argument isa
                                                                      ArrayObj
-                                                                  return length(arg.elements) >
+                                                                  return length(argument.elements) >
                                                                          0 ?
-                                                                         first(arg.elements) :
+                                                                         first(argument.elements) :
                                                                          _NULL
                                                               else
-                                                                  return ErrorObj("argument to `first` not supported, got $(type(arg))")
+                                                                  return ErrorObj("argumentument to `first` not supported, got $(type(argument))")
                                                               end
                                                           end),
-                                    "last" => BuiltinObj(function (args::Object...)
-                                                             if length(args) !=
+                                    "last" => BuiltinObj(function (arguments::AbstractObject...)
+                                                             if length(arguments) !=
                                                                 1
-                                                                 return ErrorObj("wrong number of arguments. got $(length(args)), want 1")
+                                                                 return ErrorObj("wrong number of arguments. got $(length(arguments)), want 1")
                                                              end
 
-                                                             arg = args[1]
-                                                             if arg isa
+                                                             argument = arguments[1]
+                                                             if argument isa
                                                                 StringObj
-                                                                 return length(arg.value) >
+                                                                 return length(argument.value) >
                                                                         0 ?
-                                                                        StringObj(string(last(arg.value))) :
+                                                                        StringObj(string(last(argument.value))) :
                                                                         _NULL
-                                                             elseif arg isa
+                                                             elseif argument isa
                                                                     ArrayObj
-                                                                 return length(arg.elements) >
+                                                                 return length(argument.elements) >
                                                                         0 ?
-                                                                        last(arg.elements) :
+                                                                        last(argument.elements) :
                                                                         _NULL
                                                              else
-                                                                 return ErrorObj("argument to `last` not supported, got $(type(arg))")
+                                                                 return ErrorObj("argumentument to `last` not supported, got $(type(argument))")
                                                              end
                                                          end),
-                                    "rest" => BuiltinObj(function (args::Object...)
-                                                             if length(args) !=
+                                    "rest" => BuiltinObj(function (arguments::AbstractObject...)
+                                                             if length(arguments) !=
                                                                 1
-                                                                 return ErrorObj("wrong number of arguments. got $(length(args)), want 1")
+                                                                 return ErrorObj("wrong number of arguments. got $(length(arguments)), want 1")
                                                              end
 
-                                                             arg = args[1]
-                                                             if arg isa
+                                                             argument = arguments[1]
+                                                             if argument isa
                                                                 StringObj
-                                                                 if length(arg.value) >
+                                                                 if length(argument.value) >
                                                                     0
-                                                                     _, start = iterate(arg.value)
-                                                                     return StringObj(arg.value[start:end])
+                                                                     _, start = iterate(argument.value)
+                                                                     return StringObj(argument.value[start:end])
                                                                  else
                                                                      return _NULL
                                                                  end
-                                                             elseif arg isa
+                                                             elseif argument isa
                                                                     ArrayObj
-                                                                 return length(arg.elements) >
+                                                                 return length(argument.elements) >
                                                                         0 ?
-                                                                        ArrayObj(arg.elements[2:end]) :
+                                                                        ArrayObj(argument.elements[2:end]) :
                                                                         _NULL
                                                              else
-                                                                 return ErrorObj("argument to `rest` not supported, got $(type(arg))")
+                                                                 return ErrorObj("argumentument to `rest` not supported, got $(type(argument))")
                                                              end
                                                          end),
-                                    "push" => BuiltinObj(function (args::Object...)
-                                                             if length(args) != 2
-                                                                 return ErrorObj("wrong number of arguments. got $(length(args)), want 2")
+                                    "push" => BuiltinObj(function (arguments::AbstractObject...)
+                                                             if length(arguments) != 2
+                                                                 return ErrorObj("wrong number of arguments. got $(length(arguments)), want 2")
                                                              end
 
-                                                             array = args[1]
+                                                             array = arguments[1]
                                                              if array isa ArrayObj
                                                                  elements = copy(array.elements)
-                                                                 push!(elements, args[2])
+                                                                 push!(elements,
+                                                                       arguments[2])
 
                                                                  return ArrayObj(elements)
                                                              else
-                                                                 return ErrorObj("argument to `push` must be ARRAY, got $(type(array))")
+                                                                 return ErrorObj("argumentument to `push` must be ARRAY, got $(type(array))")
                                                              end
                                                          end),
-                                    "puts" => BuiltinObj(function (args::Object...)
-                                                             for arg in args
-                                                                 if arg isa StringObj
-                                                                     println(arg.value)
+                                    "puts" => BuiltinObj(function (arguments::AbstractObject...)
+                                                             for argument in arguments
+                                                                 if argument isa StringObj
+                                                                     println(argument.value)
                                                                  else
-                                                                     println(arg)
+                                                                     println(argument)
                                                                  end
                                                              end
                                                          end))

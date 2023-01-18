@@ -2,29 +2,30 @@ const _TRUE = BooleanObj(true)
 const _FALSE = BooleanObj(false)
 const _NULL = NullObj()
 
-is_truthy(::Object) = true
+is_truthy(::AbstractObject) = true
 is_truthy(b::BooleanObj) = b.value
 is_truthy(::NullObj) = false
 
-evaluate(::Node, env::Environment) = _NULL
-evaluate(node::Program, env::Environment) = evaluate(node.stmts, env)
-evaluate(node::ExpressionStatement, env::Environment) = evaluate(node.expr, env)
+evaluate(::AbstractNode, env::Environment) = _NULL
+evaluate(node::Program, env::Environment) = evaluate(node.statements, env)
+function evaluate(node::ExpressionStatement, env::Environment)
+    evaluate(node.expression, env)
+end
 
-function evaluate(node::Vector{Expression}, env::Environment)
-    result = Object[]
-    for expr in node
-        evaluated = evaluate(expr, env)
+function evaluate(node::Vector{AbstractExpression}, env::Environment)
+    result = AbstractObject[]
+    for expression in node
+        evaluated = evaluate(expression, env)
         evaluated isa ErrorObj && return [evaluated]
-
         push!(result, evaluated)
     end
     return result
 end
 
-function evaluate(stmts::Vector{Statement}, env::Environment)
+function evaluate(statements::Vector{AbstractStatement}, env::Environment)
     result = _NULL
-    for stmt in stmts
-        result = evaluate(stmt, env)
+    for statement in statements
+        result = evaluate(statement, env)
         result isa ReturnValue && return result.value
         result isa ErrorObj && return result
     end
@@ -33,10 +34,11 @@ end
 
 function evaluate(node::PrefixExpression, env::Environment)
     right = evaluate(node.right, env)
-    return right isa ErrorObj ? right : evaluate_prefix_expression(node.operator, right)
+    return right isa ErrorObj ? right :
+           evaluate_prefix_expression(node.operator, right)
 end
 
-function evaluate_prefix_expression(operator::String, right::Object)
+function evaluate_prefix_expression(operator::String, right::AbstractObject)
     if operator == "!"
         return evaluate_bang_operator_expression(right)
     elseif operator == "-"
@@ -46,7 +48,7 @@ function evaluate_prefix_expression(operator::String, right::Object)
     end
 end
 
-function evaluate_bang_operator_expression(right::Object)
+function evaluate_bang_operator_expression(right::AbstractObject)
     if right === _FALSE || right === _NULL
         return _TRUE
     else
@@ -55,8 +57,7 @@ function evaluate_bang_operator_expression(right::Object)
 end
 
 evaluate_minus_operator_expression(right::IntegerObj) = IntegerObj(-right.value)
-
-function evaluate_minus_operator_expression(right::Object)
+function evaluate_minus_operator_expression(right::AbstractObject)
     return ErrorObj("unknown operator: -" * type(right))
 end
 
@@ -70,7 +71,8 @@ function evaluate(node::InfixExpression, env::Environment)
     return evaluate_infix_expression(node.operator, left, right)
 end
 
-function evaluate_infix_expression(operator::String, left::Object, right::Object)
+function evaluate_infix_expression(operator::String, left::AbstractObject,
+                                   right::AbstractObject)
     if type(left) != type(right)
         return ErrorObj("type mismatch: " * type(left) * " " * operator * " " * type(right))
     end
@@ -109,7 +111,8 @@ function evaluate_infix_expression(operator::String, left::IntegerObj,
     end
 end
 
-function evaluate_infix_expression(operator::String, left::StringObj, right::StringObj)
+function evaluate_infix_expression(operator::String, left::StringObj,
+                                   right::StringObj)
     if operator != "+"
         return ErrorObj("unknown operator: " * type(left) * " " * operator * " " *
                         type(right))
@@ -135,38 +138,43 @@ function evaluate(node::CallExpression, env::Environment)
     fn = evaluate(node.fn, env)
     fn isa ErrorObj && return fn
 
-    args = evaluate(node.args, env)
-    if length(args) == 1 && args[1] isa ErrorObj
-        return args[1]
+    arguments = evaluate(node.arguments, env)
+    if length(arguments) == 1 && arguments[1] isa ErrorObj
+        return arguments[1]
     end
 
-    return apply_function(fn, args)
+    return apply_function(fn, arguments)
 end
 
-apply_function(fn::Object, ::Vector{Object}) = ErrorObj("not a function: " * type(fn))
+function apply_function(fn::AbstractObject, ::Vector{AbstractObject})
+    ErrorObj("not a function: " * type(fn))
+end
 
-function apply_function(fn::FunctionObj, args::Vector{Object})
-    if length(fn.params) != length(args)
-        return ErrorObj("argument error: wrong number of args: got $(length(args))")
+function apply_function(fn::FunctionObj, arguments::Vector{AbstractObject})
+    if length(fn.params) != length(arguments)
+        return ErrorObj("argumentument error: wrong number of arguments: got $(length(arguments))")
     end
-    extended_env = extend_function_environment(fn, args)
+
+    extended_env = extend_function_environment(fn, arguments)
     evaluated = evaluate(fn.body, extended_env)
     return unwrap_return_value(evaluated)
 end
 
-function apply_function(fn::BuiltinObj, args::Vector{Object})
-    return fn.fn(args...)
+function apply_function(fn::BuiltinObj, arguments::Vector{AbstractObject})
+    return fn.fn(arguments...)
 end
 
-function extend_function_environment(fn::FunctionObj, args::Vector{Object})
+function extend_function_environment(fn::FunctionObj,
+                                     arguments::Vector{AbstractObject})
     env = Environment(fn.env)
-    for (parameter, argument) in zip(fn.params, args)
-        set!(env, parameter.value, argument)
+    for (parameter, argumentument) in zip(fn.params, arguments)
+        set!(env, parameter.value, argumentument)
     end
+
     return env
 end
 
-function unwrap_return_value(object::Object)
+function unwrap_return_value(object::AbstractObject)
     return object isa ReturnValue ? object.value : object
 end
 
@@ -180,13 +188,15 @@ function evaluate(node::IndexExpression, env::Environment)
     return evaluate_index_expression(left, index)
 end
 
-evaluate_index_expression(left::HashObj, key::Object) = Base.get(left.pairs, key, _NULL)
+function evaluate_index_expression(left::HashObj, key::AbstractObject)
+    Base.get(left.pairs, key, _NULL)
+end
 
-function evaluate_index_expression(left::Object, ::Object)
+function evaluate_index_expression(left::AbstractObject, ::AbstractObject)
     return ErrorObj("index operator not supported: " * type(left))
 end
 
-function evaluate_index_expression(::ArrayObj, index::Object)
+function evaluate_index_expression(::ArrayObj, index::AbstractObject)
     return ErrorObj("unsupported index type: " * type(index))
 end
 
@@ -198,12 +208,13 @@ end
 
 function evaluate(node::BlockStatement, env::Environment)
     result = _NULL
-    for stmt in node.stmts
-        result = evaluate(stmt, env)
+    for statement in node.statements
+        result = evaluate(statement, env)
         if result isa ReturnValue || result isa ErrorObj
             return result
         end
     end
+
     return result
 end
 
@@ -217,6 +228,7 @@ function evaluate(node::LetStatement, env::Environment)
     if val isa ErrorObj
         return val
     end
+
     set!(env, node.name.value, val)
     return val
 end
@@ -233,7 +245,6 @@ end
 evaluate(node::IntegerLiteral, env::Environment) = IntegerObj(node.value)
 evaluate(node::BooleanLiteral, env::Environment) = node.value ? _TRUE : _FALSE
 evaluate(node::StringLiteral, env::Environment) = StringObj(node.value)
-
 function evaluate(node::FunctionLiteral, env::Environment)
     return FunctionObj(node.params, node.body, env)
 end
@@ -243,11 +254,12 @@ function evaluate(node::ArrayLiteral, env::Environment)
     if length(elements) == 1 && elements[1] isa ErrorObj
         return elements[1]
     end
+
     return ArrayObj(elements)
 end
 
 function evaluate(node::HashLiteral, env::Environment)
-    pairs = Dict{Object, Object}()
+    pairs = Dict{AbstractObject, AbstractObject}()
 
     for (key_node, value_node) in node.pairs
         key = evaluate(key_node, env)

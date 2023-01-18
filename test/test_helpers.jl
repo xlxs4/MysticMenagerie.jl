@@ -1,3 +1,7 @@
+using MysticMenagerie
+
+const m = MysticMenagerie
+
 function check_parser_errors(p::m.Parser)
     if !isempty(p.errors)
         return join(vcat(["parser has $(length(p.errors)) errors"],
@@ -11,13 +15,13 @@ function test_parser_errors(p::m.Parser)
     @test isnothing(msg) || error(msg)
 end
 
-function test_identifier(id::m.Expression, value::String)
+function test_identifier(id::m.AbstractExpression, value::String)
     @test id isa m.Identifier
     @test id.value == value
     @test m.token_literal(id) == value
 end
 
-function test_integer_literal(il::m.Expression, value::Int64)
+function test_integer_literal(il::m.AbstractExpression, value::Int)
     @test il isa m.IntegerLiteral
     @test il.value == value
     @test m.token_literal(il) == string(value)
@@ -29,29 +33,32 @@ function test_boolean_literal(b::m.BooleanLiteral, value::Bool)
     @test m.token_literal(b) == string(value)
 end
 
-test_literal_expression(::m.Expression, expected) = error("Unexpected type for $expected.")
-
-function test_literal_expression(expr::m.Expression, expected::Int)
-    test_integer_literal(expr, Int64(expected))
+function test_literal_expression(::m.AbstractExpression, expected)
+    error("Unexpected type for $expected.")
 end
 
-function test_literal_expression(expr::m.Expression, expected::String)
-    test_identifier(expr, expected)
+function test_literal_expression(expression::m.AbstractExpression, expected::Int)
+    test_integer_literal(expression, Int(expected))
 end
 
-function test_literal_expression(expr::m.Expression, expected::Bool)
-    test_boolean_literal(expr, expected)
+function test_literal_expression(expression::m.AbstractExpression, expected::String)
+    test_identifier(expression, expected)
 end
 
-function test_infix_expression(expr::m.Expression, left, operator::String, right)
-    @test expr isa m.InfixExpression
-    test_literal_expression(expr.left, left)
-
-    @test expr.operator == operator
-    test_literal_expression(expr.right, right)
+function test_literal_expression(expression::m.AbstractExpression, expected::Bool)
+    test_boolean_literal(expression, expected)
 end
 
-function test_let_statement(ls::m.Statement, name::String)
+function test_infix_expression(expression::m.AbstractExpression, left,
+                               operator::String, right)
+    @test expression isa m.InfixExpression
+    test_literal_expression(expression.left, left)
+
+    @test expression.operator == operator
+    test_literal_expression(expression.right, right)
+end
+
+function test_let_statement(ls::m.AbstractStatement, name::String)
     @test ls isa m.LetStatement
     @test ls.name.value == name
     @test m.token_literal(ls.name) == name
@@ -64,18 +71,18 @@ function parse_from_code!(code::String)
     return l, p, program
 end
 
-test_object(object::m.Object, ::Nothing) = @test object === m._NULL
-function test_object(object::m.Object, expected::Int64)
+test_object(object::m.AbstractObject, ::Nothing) = @test object === m._NULL
+function test_object(object::m.AbstractObject, expected::Int)
     @test object isa m.IntegerObj
     @test object.value == expected
 end
 
-function test_object(object::m.Object, expected::Bool)
+function test_object(object::m.AbstractObject, expected::Bool)
     @test object isa m.BooleanObj
     @test object.value == expected
 end
 
-test_object(object::m.Object, expected::String) = @test object.message == expected
+test_object(object::m.AbstractObject, expected::String) = @test object.message == expected
 test_object(::m.NullObj, expected::String) = @test expected == ""
 test_object(object::m.StringObj, expected::String) = @test object.value == expected
 
@@ -98,7 +105,7 @@ function test_object(object::m.HashObj, expected::Dict)
     @test length(object.pairs) == length(expected)
 
     for (k, v) in collect(expected)
-        key = m.Object(k)
+        key = m.AbstractObject(k)
         test_object(get(object.pairs, key, nothing), v)
     end
 end

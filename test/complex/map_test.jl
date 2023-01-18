@@ -1,4 +1,10 @@
-@testset "Test map implementation" begin for (code, expected) in [
+include("../test_helpers.jl")
+
+using MysticMenagerie
+
+const m = MysticMenagerie
+
+for (code, expected) in [
     ("""
     let map = fn(f, arr) {
         let iter = fn(arr, accumulated) {
@@ -19,7 +25,7 @@
     """, 8)
 ]
     evaluated = evaluate_from_code!(code)
-    @test evaluated isa m.Object
+    @test evaluated isa m.AbstractObject
 
     test_object(evaluated, expected)
-end end
+end

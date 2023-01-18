@@ -1,12 +1,17 @@
-@testset "Test token_literal" begin for (program, expected) in [
+include("../test_helpers.jl")
+
+using MysticMenagerie
+
+const m = MysticMenagerie
+
+for (program, expected) in [
     (m.Program([]), ""),
     (m.Program([
                    m.LetStatement(m.Token(m.LET, "let"),
                                   m.Identifier(m.Token(m.IDENT, "myVar"), "myVar"),
                                   m.Identifier(m.Token(m.IDENT, "anotherVar"),
                                                "anotherVar")),
-               ]),
-     "let"),
+               ]), "let"),
 ]
     @test m.token_literal(program) == expected
-end end
+end

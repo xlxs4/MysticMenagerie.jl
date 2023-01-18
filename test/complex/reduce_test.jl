@@ -1,4 +1,10 @@
-@testset "Test reduce implementation" begin for (code, expected) in [
+include("../test_helpers.jl")
+
+using MysticMenagerie
+
+const m = MysticMenagerie
+
+for (code, expected) in [
     ("""
     let reduce = fn(f, arr, initial) {
         let iter = fn(arr, result) {
@@ -20,7 +26,7 @@
     """, 15)
 ]
     evaluated = evaluate_from_code!(code)
-    @test evaluated isa m.Object
+    @test evaluated isa m.AbstractObject
 
     test_object(evaluated, expected)
-end end
+end

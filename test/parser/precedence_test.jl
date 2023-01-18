@@ -1,4 +1,10 @@
-@testset "Test operator precedence" begin for (code, expected) in [
+using MysticMenagerie
+
+const m = MysticMenagerie
+
+include("../test_helpers.jl")
+
+for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
     ("a + b + c", "((a + b) + c)"),
@@ -25,10 +31,11 @@
      "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))"),
     ("add(a + b + c * d / f + g)", "add((((a + b) + ((c * d) / f)) + g))"),
     ("a * [1, 2, 3, 4][b * c] * d", "((a * ([1, 2, 3, 4][(b * c)])) * d)"),
-    ("add(a * b[2], b[1], 2 * [1, 2][1])", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"),
+    ("add(a * b[2], b[1], 2 * [1, 2][1])",
+     "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"),
 ]
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
     @test string(program) == expected
-end end
+end

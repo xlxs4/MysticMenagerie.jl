@@ -1,75 +1,77 @@
-abstract type Node end
-abstract type Expression <: Node end
-abstract type Statement <: Node end
+abstract type AbstractNode end
+abstract type AbstractExpression <: AbstractNode end
+abstract type AbstractStatement <: AbstractNode end
 
-token_literal(node::Node) = node.token.literal
-Base.string(node::Node) = node.token.literal
-Base.show(io::IO, node::Node) = print(io, string(node))
+token_literal(node::AbstractNode) = node.token.literal
+Base.string(node::AbstractNode) = node.token.literal
+Base.show(io::IO, node::AbstractNode) = print(io, string(node))
 
-struct Program <: Node
-    stmts::Vector{Statement}
+struct Program <: AbstractNode
+    statements::Vector{AbstractStatement}
 end
 
-token_literal(p::Program) = !isempty(p.stmts) ? token_literal(p.stmts[1]) : ""
-Base.string(p::Program) = join(map(string, p.stmts))
+token_literal(p::Program) = !isempty(p.statements) ? token_literal(p.statements[1]) : ""
+Base.string(p::Program) = join(map(string, p.statements))
 Base.show(io::IO, p::Program) = print(io, string(p))
 
-struct Identifier <: Expression
+struct Identifier <: AbstractExpression
     token::Token
     value::String
 end
 
 Base.string(id::Identifier) = id.value
 
-struct ExpressionStatement{T <: Expression} <: Statement
+struct ExpressionStatement{E <: AbstractExpression} <: AbstractStatement
     token::Token
-    expr::T
+    expression::E
 end
 
-Base.string(es::ExpressionStatement) = string(es.expr)
+Base.string(es::ExpressionStatement) = string(es.expression)
 
-struct LetStatement{T <: Expression} <: Statement
+struct LetStatement{E <: AbstractExpression} <: AbstractStatement
     token::Token
     name::Identifier
-    value::T
+    value::E
 end
 
 function Base.string(ls::LetStatement)
     return ls.token.literal * " " * string(ls.name) * " = " * string(ls.value) * ";"
 end
 
-struct ReturnStatement{T <: Expression} <: Statement
+struct ReturnStatement{E <: AbstractExpression} <: AbstractStatement
     token::Token
-    return_value::T
+    return_value::E
 end
 
-Base.string(rs::ReturnStatement) = token_literal(rs) * " " * string(rs.return_value) * ";"
-
-struct BlockStatement <: Statement
-    token::Token
-    stmts::Vector{Statement}
+function Base.string(rs::ReturnStatement)
+    token_literal(rs) * " " * string(rs.return_value) * ";"
 end
 
-Base.string(bs::BlockStatement) = join(map(string, bs.stmts))
-
-struct IntegerLiteral <: Expression
+struct BlockStatement <: AbstractStatement
     token::Token
-    value::Int64
+    statements::Vector{AbstractStatement}
 end
 
-struct BooleanLiteral <: Expression
+Base.string(bs::BlockStatement) = join(map(string, bs.statements))
+
+struct IntegerLiteral <: AbstractExpression
+    token::Token
+    value::Int
+end
+
+struct BooleanLiteral <: AbstractExpression
     token::Token
     value::Bool
 end
 
-struct StringLiteral <: Expression
+struct StringLiteral <: AbstractExpression
     token::Token
     value::String
 end
 
 Base.string(sl::StringLiteral) = "\"" * string(sl.value) * "\""
 
-struct FunctionLiteral <: Expression
+struct FunctionLiteral <: AbstractExpression
     token::Token
     params::Vector{Identifier}
     body::BlockStatement
@@ -80,18 +82,18 @@ function Base.string(fl::FunctionLiteral)
            string(fl.body)
 end
 
-struct ArrayLiteral <: Expression
+struct ArrayLiteral <: AbstractExpression
     token::Token
-    elements::Vector{Expression}
+    elements::Vector{AbstractExpression}
 end
 
 function Base.string(al::ArrayLiteral)
     return "[" * join(map(string, al.elements), ", ") * "]"
 end
 
-struct HashLiteral <: Expression
+struct HashLiteral <: AbstractExpression
     token::Token
-    pairs::Dict{Expression, Expression}
+    pairs::Dict{AbstractExpression, AbstractExpression}
 end
 
 function Base.string(hl::HashLiteral)
@@ -99,28 +101,29 @@ function Base.string(hl::HashLiteral)
            join(map(x -> string(x[1]) * ":" * string(x[2]), collect(hl.pairs)), ", ") * "}"
 end
 
-struct PrefixExpression{T <: Expression} <: Expression
+struct PrefixExpression{E <: AbstractExpression} <: AbstractExpression
     token::Token
     operator::String
-    right::T
+    right::E
 end
 
 Base.string(pe::PrefixExpression) = "(" * pe.operator * string(pe.right) * ")"
 
-struct InfixExpression{T <: Expression, N <: Expression} <: Expression
+struct InfixExpression{E1 <: AbstractExpression, E2 <: AbstractExpression} <:
+       AbstractExpression
     token::Token
-    left::T
+    left::E1
     operator::String
-    right::N
+    right::E2
 end
 
 function Base.string(ie::InfixExpression)
     return "(" * string(ie.left) * " " * ie.operator * " " * string(ie.right) * ")"
 end
 
-struct IfExpression{T <: Expression} <: Expression
+struct IfExpression{E <: AbstractExpression} <: AbstractExpression
     token::Token
-    condition::T
+    condition::E
     consequence::BlockStatement
     alternative::Optional{BlockStatement}
 end
@@ -131,20 +134,21 @@ function Base.string(ie::IfExpression)
            (left * "else { " * string(ie.alternative) * " }")
 end
 
-struct CallExpression{T <: Expression} <: Expression
+struct CallExpression{E <: AbstractExpression} <: AbstractExpression
     token::Token
-    fn::T
-    args::Vector{Expression}
+    fn::E
+    arguments::Vector{AbstractExpression}
 end
 
 function Base.string(ce::CallExpression)
-    return string(ce.fn) * "(" * join(map(string, ce.args), ", ") * ")"
+    return string(ce.fn) * "(" * join(map(string, ce.arguments), ", ") * ")"
 end
 
-struct IndexExpression{T <: Expression, N <: Expression} <: Expression
+struct IndexExpression{E1 <: AbstractExpression, E2 <: AbstractExpression} <:
+       AbstractExpression
     token::Token
-    left::T
-    index::N
+    left::E1
+    index::E2
 end
 
 function Base.string(ie::IndexExpression)
