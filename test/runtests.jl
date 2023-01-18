@@ -42,6 +42,13 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "Operator" begin include("lexer/operator_test.jl") end
     end
 
+    if GROUP == "All" || GROUP == "Object"
+        @time @safetestset "Equality" begin include("object/equality_test.jl") end
+        @time @safetestset "String" begin include("object/string_test.jl") end
+        @time @safetestset "Truthy" begin include("object/truthy_test.jl") end
+        @time @safetestset "Type" begin include("object/type_test.jl") end
+    end
+
     if GROUP == "All" || GROUP == "Parser"
         @time @safetestset "Expression" begin include("parser/expression_test.jl") end
         @time @safetestset "Literal" begin include("parser/literal_test.jl") end
