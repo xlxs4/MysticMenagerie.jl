@@ -47,8 +47,8 @@ end end
     ("(1 > 2) == false", true),
     ("\"a\" == \"a\"", true),
     ("\"a\" == \"b\"", false),
-    ("\"b\" == \"a\"", false),
-    ("\"b\" == \"b\"", true),
+    ("\"b\" != \"a\"", true),
+    ("\"b\" != \"b\"", false),
 ]
     evaluated = evaluate_from_code!(code)
     test_object(evaluated, expected)

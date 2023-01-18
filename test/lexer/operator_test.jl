@@ -2,17 +2,19 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-l = m.Lexer("!-/*5;")
-expected = map(x -> m.Token(x...),
-               [
-                   (m.BANG, "!"),
-                   (m.MINUS, "-"),
-                   (m.SLASH, "/"),
-                   (m.ASTERISK, "*"),
-                   (m.INT, "5"),
-                   (m.SEMICOLON, ";"),
-               ])
+@testset "Test Operator Token Set" begin
+    l = m.Lexer("!-/*5;")
+    expected = map(x -> m.Token(x...),
+                   [
+                       (m.BANG, "!"),
+                       (m.MINUS, "-"),
+                       (m.SLASH, "/"),
+                       (m.ASTERISK, "*"),
+                       (m.INT, "5"),
+                       (m.SEMICOLON, ";"),
+                   ])
 
-for token in expected
-    @test m.next_token!(l) == token
+    for token in expected
+        @test m.next_token!(l) == token
+    end
 end

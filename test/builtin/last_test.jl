@@ -4,7 +4,7 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-for (code, expected) in [
+@testset "Test last" begin for (code, expected) in [
     ("last([1, 2, 3])", 3),
     ("last([])", nothing),
     ("last(\"hello\")", "o"),
@@ -13,7 +13,5 @@ for (code, expected) in [
     ("last([1, 2], [3, 4])", ArgumentError("wrong number of arguments. got 2, want 1")),
 ]
     evaluated = evaluate_from_code!(code)
-    @test evaluated isa m.AbstractObject
-
     test_object(evaluated, expected)
-end
+end end

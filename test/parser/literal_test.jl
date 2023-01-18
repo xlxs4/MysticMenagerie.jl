@@ -4,16 +4,16 @@ const m = MysticMenagerie
 
 include("../test_helpers.jl")
 
-for (code, expected_error) in [
+@testset "Test Invalid IntegerLiteral" begin for (code, expected_error) in [
     ("foo", "parser error: could not parse foo as integer")
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
     m.parse_integer_literal!(p)
     @test split(check_parser_errors(p), '\n')[2] == expected_error
-end
+end end
 
-for (code, value) in [
+@testset "Test IntegerLiteral" begin for (code, value) in [
     ("5;", 5)
 ]
     _, p, program = parse_from_code!(code)
@@ -26,9 +26,9 @@ for (code, value) in [
 
     il = statement.expression
     test_literal_expression(il, value)
-end
+end end
 
-for (code, value) in [
+@testset "Test StringLiteral" begin for (code, value) in [
     ("\"hello world\";", "hello world")
 ]
     _, p, program = parse_from_code!(code)
@@ -42,9 +42,9 @@ for (code, value) in [
     expression = statement.expression
     @test expression isa m.StringLiteral
     @test expression.value == value
-end
+end end
 
-for (code) in [("fn(x, y) { x + y; }")]
+@testset "Test FunctionLiteral Body" begin for (code) in [("fn(x, y) { x + y; }")]
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
@@ -66,9 +66,9 @@ for (code) in [("fn(x, y) { x + y; }")]
     @test body_statement isa m.ExpressionStatement
 
     test_infix_expression(body_statement.expression, "x", "+", "y")
-end
+end end
 
-for (code, expected) in [
+@testset "Test FunctionLiteral Parameters" begin for (code, expected) in [
     ("fn() {};", []),
     ("fn(x) {};", ["x"]),
     ("fn(x, y, z) {};", ["x", "y", "z"]),
@@ -87,9 +87,9 @@ for (code, expected) in [
     for (parameter, expected_parameter) in zip(fn.params, expected)
         test_literal_expression(parameter, expected_parameter)
     end
-end
+end end
 
-for (code) in [
+@testset "Test ArrayLiteral" begin for (code) in [
     ("[1, 2 * 2, 3 + 3]")
 ]
     _, p, program = parse_from_code!(code)
@@ -108,9 +108,9 @@ for (code) in [
 
     test_infix_expression(al.elements[2], 2, "*", 2)
     test_infix_expression(al.elements[3], 3, "+", 3)
-end
+end end
 
-for (code, expected) in [
+@testset "Test HashLiteral with StringLiteral" begin for (code, expected) in [
     ("{\"one\": 1, \"two\": 2, \"three\": 3}",
      Dict("one" => 1, "two" => 2, "three" => 3))
 ]
@@ -132,9 +132,9 @@ for (code, expected) in [
         @test key.value in keys(expected)
         test_integer_literal(value, expected[key.value])
     end
-end
+end end
 
-for (code, tests) in [
+@testset "Test HashLiteral Expressions" begin for (code, tests) in [
     ("""{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}""",
      Dict("one" => x -> test_infix_expression(x, 0, "+", 1),
           "two" => x -> test_infix_expression(x, 10, "-", 8),
@@ -158,9 +158,9 @@ for (code, tests) in [
         @test key.value in keys(tests)
         tests[key.value](value)
     end
-end
+end end
 
-for (code, expected) in [
+@testset "Test HashLiteral with IntegerLiteral" begin for (code, expected) in [
     ("{1: 1, 2: 2, 3: 3}",
      Dict(1 => 1, 2 => 2, 3 => 3))
 ]
@@ -182,9 +182,9 @@ for (code, expected) in [
         @test key.value in keys(expected)
         test_integer_literal(value, expected[key.value])
     end
-end
+end end
 
-for (code, expected) in [
+@testset "Test HashLiteral with BooleanLiteral" begin for (code, expected) in [
     ("{false: 0, true: 1}",
      Dict(false => 0, true => 1))
 ]
@@ -206,9 +206,9 @@ for (code, expected) in [
         @test key.value in keys(expected)
         test_integer_literal(value, expected[key.value])
     end
-end
+end end
 
-for (code) in [
+@testset "Test Empty HashLiteral" begin for (code) in [
     ("{}")
 ]
     _, p, program = parse_from_code!(code)
@@ -223,4 +223,4 @@ for (code) in [
     @test hl isa m.HashLiteral
 
     @test length(hl.pairs) == 0
-end
+end end

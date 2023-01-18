@@ -4,7 +4,7 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-for (code, expected) in [
+@testset "Test reduce Implementation" begin for (code, expected) in [
     ("""
     let reduce = fn(f, arr, initial) {
         let iter = fn(arr, result) {
@@ -26,7 +26,5 @@ for (code, expected) in [
     """, 15)
 ]
     evaluated = evaluate_from_code!(code)
-    @test evaluated isa m.AbstractObject
-
     test_object(evaluated, expected)
-end
+end end

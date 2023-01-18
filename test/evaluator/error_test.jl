@@ -44,7 +44,8 @@ end end
         
         return 1;
     }
-    """, m.UnknownOperator("NULL + NULL")),
+    """, m.UnknownOperator("NULL + NULL"),
+     ("5 ~ 5", m.UnknownOperator("INTEGER ~ INTEGER"))),
 ]
     evaluated = evaluate_from_code!(code)
     test_object(evaluated, expected)
@@ -77,6 +78,13 @@ end end
     ("fn() { 1; }(1);", ArgumentError("wrong number of arguments: got 1, want 0")),
     ("fn(a) { a; }();", ArgumentError("wrong number of arguments: got 0, want 1")),
     ("fn(a, b) { a + b; }(1);", ArgumentError("wrong number of arguments: got 1, want 2")),
+]
+    evaluated = evaluate_from_code!(code)
+    test_object(evaluated, expected)
+end end
+
+@testset "Test Propagation" begin for (code, expected) in [
+    ("let x = a", m.UnknownIdentifier("a"))
 ]
     evaluated = evaluate_from_code!(code)
     test_object(evaluated, expected)

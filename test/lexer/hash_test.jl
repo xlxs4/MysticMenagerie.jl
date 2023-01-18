@@ -2,17 +2,19 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-l = m.Lexer("{\"foo\": \"bar\"}")
-expected = map(x -> m.Token(x...),
-               [
-                   (m.LBRACE, "{"),
-                   (m.STRING, "foo"),
-                   (m.COLON, ":"),
-                   (m.STRING, "bar"),
-                   (m.RBRACE, "}"),
-                   (m.EOF, ""),
-               ])
+@testset "Test Hash" begin
+    l = m.Lexer("{\"foo\": \"bar\"}")
+    expected = map(x -> m.Token(x...),
+                   [
+                       (m.LBRACE, "{"),
+                       (m.STRING, "foo"),
+                       (m.COLON, ":"),
+                       (m.STRING, "bar"),
+                       (m.RBRACE, "}"),
+                       (m.EOF, ""),
+                   ])
 
-for token in expected
-    @test m.next_token!(l) == token
+    for token in expected
+        @test m.next_token!(l) == token
+    end
 end

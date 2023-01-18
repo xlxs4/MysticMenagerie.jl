@@ -14,6 +14,7 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "len" begin include("builtin/len_test.jl") end
         @time @safetestset "push" begin include("builtin/push_test.jl") end
         @time @safetestset "rest" begin include("builtin/rest_test.jl") end
+        @time @safetestset "type" begin include("builtin/type_test.jl") end
     end
 
     if GROUP == "All" || GROUP == "Complex"
@@ -26,6 +27,7 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "Error" begin include("evaluator/error_test.jl") end
         @time @safetestset "Expression" begin include("evaluator/expression_test.jl") end
         @time @safetestset "Literal" begin include("evaluator/literal_test.jl") end
+        @time @safetestset "Node" begin include("evaluator/node_test.jl") end
         @time @safetestset "Statement" begin include("evaluator/statement_test.jl") end
         @time @safetestset "Type" begin include("evaluator/type_test.jl") end
     end
@@ -40,6 +42,10 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "Illegal" begin include("lexer/illegal_test.jl") end
         @time @safetestset "Keyword" begin include("lexer/keyword_test.jl") end
         @time @safetestset "Operator" begin include("lexer/operator_test.jl") end
+    end
+
+    if GROUP == "All" || GROUP == "Methods"
+        @time @safetestset "Immutable" begin include("methods/immutable_test.jl") end
     end
 
     if GROUP == "All" || GROUP == "Object"

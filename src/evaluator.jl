@@ -290,25 +290,25 @@ end
 
 AbstractNode(::AbstractObject) = NullLiteral(Token(NULL, "null"))
 function AbstractNode(object::IntegerObj)
-    IntegerLiteral(Token(INT, string(object.value)), object.value)
+    return IntegerLiteral(Token(INT, string(object.value)), object.value)
 end
 
 AbstractNode(object::StringObj) = StringLiteral(Token(STRING, object.value), object.value)
 function AbstractNode(object::BooleanObj)
-    return BooleanLiteral(Token(object.value ? _TRUE : _FALSE, string(object.value)),
+    return BooleanLiteral(Token(object.value ? TRUE : FALSE, string(object.value)),
                           object.value)
+end
+
+function AbstractNode(object::ArrayObj)
+    return ArrayLiteral(Token(LBRACKET, "["), map(AbstractNode, object.elements))
+end
+
+function Node(object::FunctionObj)
+    return FunctionLiteral(Token(FUNCTION, "fn"), object.parameters, object.body)
 end
 
 function AbstractNode(object::HashObj)
     return HashLiteral(Token(LBRACE, "{"),
                        Dict(AbstractNode(key) => AbstractNode(value)
                             for (key, value) in collect(object.pairs)))
-end
-
-function AbstractNode(object::ArrayObj)
-    ArrayLiteral(Token(LBRACKET, "["), map(AbstractNode, object.elements))
-end
-
-function Node(object::FunctionObj)
-    FunctionLiteral(Token(FUNCTION, "fn"), object.parameters, object.body)
 end

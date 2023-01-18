@@ -23,6 +23,7 @@ jobs:
           - Complex
           - Evaluator
           - Lexer
+          - Methods
           - Object
           - Parser
         version:

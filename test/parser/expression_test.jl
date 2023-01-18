@@ -4,7 +4,7 @@ const m = MysticMenagerie
 
 include("../test_helpers.jl")
 
-for (code, value) in [
+@testset "Test Identifier" begin for (code, value) in [
     ("foobar;", "foobar")
 ]
     _, p, program = parse_from_code!(code)
@@ -17,9 +17,9 @@ for (code, value) in [
 
     ident = statement.expression
     test_literal_expression(ident, value)
-end
+end end
 
-for (code, value) in [
+@testset "Test Boolean Keyword" begin for (code, value) in [
     ("true;", true),
     ("false;", false),
 ]
@@ -33,16 +33,16 @@ for (code, value) in [
 
     boolean = statement.expression
     test_literal_expression(boolean, value)
-end
+end end
 
-for (code, expected_error) in [
+@testset "Test ILLEGAL PrefixExpression" begin for (code, expected_error) in [
     ("#;", "parser error: no prefix parse function for ILLEGAL found")
 ]
     _, p, _ = parse_from_code!(code)
     @test split(check_parser_errors(p), '\n')[2] == expected_error
-end
+end end
 
-for (code, operator, right_value) in [
+@testset "Test PrefixExpression" begin for (code, operator, right_value) in [
     ("!5;", "!", 5),
     ("-15;", "-", 15),
     ("!true;", "!", true),
@@ -61,9 +61,9 @@ for (code, operator, right_value) in [
     @test expression.operator == operator
 
     test_literal_expression(expression.right, right_value)
-end
+end end
 
-for (code, left, operator, right) in [
+@testset "Test InfixExpression" begin for (code, left, operator, right) in [
     ("5 + 5;", 5, "+", 5),
     ("5 - 5;", 5, "-", 5),
     ("5 * 5;", 5, "*", 5),
@@ -86,9 +86,9 @@ for (code, left, operator, right) in [
 
     expression = statement.expression
     test_infix_expression(expression, left, operator, right)
-end
+end end
 
-for (code) in [("if (x < y) { x }")]
+@testset "Test If" begin for (code) in [("if (x < y) { x }")]
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
@@ -110,9 +110,9 @@ for (code) in [("if (x < y) { x }")]
     test_identifier(consequence.expression, "x")
 
     @test isnothing(expression.alternative)
-end
+end end
 
-for (code) in [("if (x < y) { x } else { y }")]
+@testset "Test If Else" begin for (code) in [("if (x < y) { x } else { y }")]
     _, p, program = parse_from_code!(code)
     test_parser_errors(p)
 
@@ -139,9 +139,9 @@ for (code) in [("if (x < y) { x } else { y }")]
     @test alternative isa m.ExpressionStatement
 
     test_identifier(alternative.expression, "y")
-end
+end end
 
-for (code, expected_ident) in [
+@testset "Test CallExpression" begin for (code, expected_ident) in [
     ("foo()", "foo")
 ]
     _, p, program = parse_from_code!(code)
@@ -157,9 +157,9 @@ for (code, expected_ident) in [
 
     test_identifier(expression.fn, expected_ident)
     @test isempty(expression.arguments)
-end
+end end
 
-for (code, expected_ident, left, operator, right) in [
+@testset "Test CallExpression with Arguments" begin for (code, expected_ident, left, operator, right) in [
     ("add(1, 2 * 3, 4 + 5)",
      "add",
      (2, 4),
@@ -187,9 +187,9 @@ for (code, expected_ident, left, operator, right) in [
                           right[1])
     test_infix_expression(expression.arguments[3], left[2], operator[2],
                           right[2])
-end
+end end
 
-for (code, left, operator, right) in [
+@testset "Test IndexExpression" begin for (code, left, operator, right) in [
     ("myArray[1 + 1]", 1, "+", 1)
 ]
     _, p, program = parse_from_code!(code)
@@ -205,4 +205,4 @@ for (code, left, operator, right) in [
 
     test_identifier(expression.left, "myArray")
     test_infix_expression(expression.index, left, operator, right)
-end
+end end

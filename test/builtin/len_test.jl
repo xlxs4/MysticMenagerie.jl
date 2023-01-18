@@ -4,7 +4,7 @@ using MysticMenagerie
 
 const m = MysticMenagerie
 
-for (code, expected) in [
+@testset "Test len" begin for (code, expected) in [
     ("len(\"\")", 0),
     ("len(\"four\")", 4),
     ("len(\"hello world\")", 11),
@@ -17,7 +17,5 @@ for (code, expected) in [
     ("len({})", 0),
 ]
     evaluated = evaluate_from_code!(code)
-    @test evaluated isa m.AbstractObject
-
     test_object(evaluated, expected)
-end
+end end

@@ -4,7 +4,7 @@ const m = MysticMenagerie
 
 include("../test_helpers.jl")
 
-for (code, expected) in [
+@testset "Test Precedence" begin for (code, expected) in [
     ("-a * b", "((-a) * b)"),
     ("!-a", "(!(-a))"),
     ("a + b + c", "((a + b) + c)"),
@@ -38,4 +38,4 @@ for (code, expected) in [
     test_parser_errors(p)
 
     @test string(program) == expected
-end
+end end
