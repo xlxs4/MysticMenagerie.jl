@@ -5,6 +5,7 @@ const GROUP = get(ENV, "GROUP", "All")
 @time begin
     if GROUP == "All" || GROUP == "AST"
         @time @safetestset "Base.string" begin include("ast/base_string_test.jl") end
+        @time @safetestset "Base.show" begin include("ast/base_show_test.jl") end
         @time @safetestset "Token literal" begin include("ast/token_literal_test.jl") end
     end
 
