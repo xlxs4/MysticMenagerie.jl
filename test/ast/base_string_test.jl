@@ -30,12 +30,17 @@ end
         }
      }
 
+     let g = if (true) {
+        fn(x) { x + 1 }
+     }
+
      let c = f(b); 
 
      let d = [a, b, c];
      let e = {a:b};
+     let h = "hello world"
      """,
-     "let a = 1;let b = (a + 2);let f = if (true) { fn(x) (x + 1) } else { fn(x) return (x * 2); };let c = f(b);let d = [a, b, c];let e = {a: b};")
+     "let a = 1;let b = (a + 2);let f = if (true) { fn(x) (x + 1) } else { fn(x) return (x * 2); };let g = if (true) { fn(x) (x + 1) } ;let c = f(b);let d = [a, b, c];let e = {a: b};let h = \"hello world\";")
 ]
     l = m.Lexer(code)
     p = m.Parser(l)
