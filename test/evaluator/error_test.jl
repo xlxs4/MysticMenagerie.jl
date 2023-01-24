@@ -1,8 +1,19 @@
 using MysticMenagerie
+using Suppressor: @capture_out
 
 const m = MysticMenagerie
 
 include("../test_helpers.jl")
+
+@testset "Test error to IO" begin for (code, expected) in [
+    (m.DivisionByZero("oh no!"), "division by zero: oh no!"),
+    (m.TypeMismatch("oh no!"), "type mismatch: oh no!"),
+    (m.UnknownIdentifier("oh no!"), "unknown identifier: oh no!"),
+    (m.UnknownOperator("oh no!"), "unknown operator: oh no!"),
+]
+    out = @capture_out begin showerror(stdout, code) end
+    test_object(out, expected)
+end end
 
 @testset "Test TypeMismatch" begin for (code, expected) in [
     ("5 + true;", m.TypeMismatch("INTEGER + BOOLEAN")),
