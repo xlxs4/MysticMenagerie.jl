@@ -29,8 +29,6 @@ mutable struct Parser
     infix_parse_functions::Dict{TokenType, Function}
 end
 
-register_prefix!(p::Parser, t::TokenType, fn::Function) = p.prefix_parse_functions[t] = fn
-register_infix!(p::Parser, t::TokenType, fn::Function) = p.infix_parse_functions[t] = fn
 function next_token!(p::Parser)
     p.current_token = p.peek_token
     p.peek_token = next_token!(p.lexer)

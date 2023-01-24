@@ -303,8 +303,8 @@ function AbstractNode(object::ArrayObj)
     return ArrayLiteral(Token(LBRACKET, "["), map(AbstractNode, object.elements))
 end
 
-function Node(object::FunctionObj)
-    return FunctionLiteral(Token(FUNCTION, "fn"), object.parameters, object.body)
+function AbstractNode(object::FunctionObj)
+    return FunctionLiteral(Token(FUNCTION, "fn"), object.params, object.body)
 end
 
 function AbstractNode(object::HashObj)

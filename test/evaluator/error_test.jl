@@ -55,8 +55,7 @@ end end
         
         return 1;
     }
-    """, m.UnknownOperator("NULL + NULL"),
-     ("5 ~ 5", m.UnknownOperator("INTEGER ~ INTEGER"))),
+    """, m.UnknownOperator("NULL + NULL")),
 ]
     evaluated = evaluate_from_code!(code)
     test_object(evaluated, expected)
@@ -95,7 +94,8 @@ end end
 end end
 
 @testset "Test Propagation" begin for (code, expected) in [
-    ("let x = a", m.UnknownIdentifier("a"))
+    ("let x = a", m.UnknownIdentifier("a")),
+    ("!a", m.UnknownIdentifier("a")),
 ]
     evaluated = evaluate_from_code!(code)
     test_object(evaluated, expected)

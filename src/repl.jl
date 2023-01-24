@@ -9,6 +9,7 @@ const PRELUDE = """
 ███   ███   ███ ███   ███    ▄█    ███     ███     ███  ███    ███ 
  ▀█   ███   █▀   ▀█████▀   ▄████████▀     ▄████▀   █▀   ████████▀  
 
+
 ███╗   ███╗███████╗███╗   ██╗ █████╗  ██████╗ ███████╗██████╗ ██╗███████╗
 ████╗ ████║██╔════╝████╗  ██║██╔══██╗██╔════╝ ██╔════╝██╔══██╗██║██╔════╝
 ██╔████╔██║█████╗  ██╔██╗ ██║███████║██║  ███╗█████╗  ██████╔╝██║█████╗  
@@ -32,7 +33,7 @@ function start_repl()
         program = parse_program!(p)
 
         if !isempty(p.errors)
-            println(ErrorObj("parser has $(length(p.errors)) error$(length(p.errors) == 1 ? "" : "s")"))
+            println(ErrorObj(ErrorException("parser has $(length(p.errors)) error$(length(p.errors) == 1 ? "" : "s")")))
             println(join(map(string, p.errors), "\n"))
             continue
         end

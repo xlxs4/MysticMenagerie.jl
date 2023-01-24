@@ -52,6 +52,7 @@ const GROUP = get(ENV, "GROUP", "All")
 
     if GROUP == "All" || GROUP == "Object"
         @time @safetestset "Equality" begin include("object/equality_test.jl") end
+        @time @safetestset "Interface" begin include("object/interface_test.jl") end
         @time @safetestset "String" begin include("object/string_test.jl") end
         @time @safetestset "Truthy" begin include("object/truthy_test.jl") end
         @time @safetestset "Type" begin include("object/type_test.jl") end
