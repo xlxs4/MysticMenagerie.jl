@@ -27,7 +27,6 @@ jobs:
           - Object
           - Parser
         version:
-          - '1.7'
           - '1.8'
         os:
           - ubuntu-latest
