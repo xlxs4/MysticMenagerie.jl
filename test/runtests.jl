@@ -15,6 +15,7 @@ const GROUP = get(ENV, "GROUP", "All")
         @time @safetestset "push" begin include("builtin/push_test.jl") end
         @time @safetestset "rest" begin include("builtin/rest_test.jl") end
         @time @safetestset "type" begin include("builtin/type_test.jl") end
+        @time @safetestset "puts" begin include("builtin/puts_test.jl") end
     end
 
     if GROUP == "All" || GROUP == "Complex"

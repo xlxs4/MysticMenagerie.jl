@@ -90,6 +90,7 @@ function test_object(object::m.ErrorObj, expected::Exception)
 end
 
 test_object(::m.NullObj, expected::String) = @test expected == ""
+test_object(object::String, expected::String) = @test object == expected
 test_object(object::m.StringObj, expected::String) = @test object.value == expected
 function test_object(object::m.FunctionObj, expected_parameter::String,
                      expected_body::String)
