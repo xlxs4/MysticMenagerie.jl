@@ -2,14 +2,24 @@ const _TRUE = BooleanObj(true)
 const _FALSE = BooleanObj(false)
 const _NULL = NullObj()
 
-is_truthy(::AbstractObject) = true
-is_truthy(b::BooleanObj) = b.value
-is_truthy(::NullObj) = false
+abstract type TruthyTrait end
+struct IsTruthy <: TruthyTrait end
+struct IsBool <: TruthyTrait end
+struct IsFalsy <: TruthyTrait end
+
+TruthyTrait(::Type) = IsTruthy()
+TruthyTrait(::Type{<:BooleanObj}) = IsBool()
+TruthyTrait(::Type{<:NullObj}) = IsFalsy()
+
+is_truthy(x::T) where {T} = is_truthy(TruthyTrait(T), x)
+is_truthy(::IsTruthy, x) = true
+is_truthy(::IsBool, x) = x.value
+is_truthy(::IsFalsy, x) = false
 
 evaluate(::AbstractNode, env::Environment) = _NULL
 evaluate(node::Program, env::Environment) = evaluate(node.statements, env)
 function evaluate(node::ExpressionStatement, env::Environment)
-    evaluate(node.expression, env)
+    return evaluate(node.expression, env)
 end
 
 function evaluate(node::Vector{AbstractExpression}, env::Environment)
